@@ -10,21 +10,19 @@ def main_menu():
 	title_label = Label(window, image=title_image)
 	title_label.pack(anchor=CENTER, pady=50)
 	
-	play_label = Button(window, image=play_image, command=play_menu)
-	play_label.pack(anchor=CENTER, pady=(0,5))
+	play_button = Button(window, image=playbutton_image, command=play_menu)
+	play_button.pack(anchor=CENTER, pady=(0,5))
 
-	howToPlay_label = Button(window, image=howToPlay_image, command=howtoplay_menu)
-	howToPlay_label.pack(anchor=CENTER, pady=(5,5))
+	howtoplay_button = Button(window, image=howtoplaybutton_image, command=howtoplay_menu)
+	howtoplay_button.pack(anchor=CENTER, pady=(5,5))
 
-	about_label = Button(window, image=about_image, command=about_menu)
-	about_label.pack(anchor=CENTER, pady=(5,5))
+	about_button = Button(window, image=aboutbutton_image, command=about_menu)
+	about_button.pack(anchor=CENTER, pady=(5,5))
 
-	exit_label = Button(window, image=exit_image, command=exit)
-	exit_label.pack(anchor=CENTER, pady=(5,5))
+	exit_button = Button(window, image=exitbutton_image, command=exit)
+	exit_button.pack(anchor=CENTER, pady=(5,5))
 
 	window.mainloop()
-
-
 
 def play_menu():
 	"""Menu for when play is chosen, can choose ships"""
@@ -33,14 +31,17 @@ def play_menu():
 		if widgets != background_label:
 			widgets.destroy()
 
+	title_label = Label(window, image=title_image)
+	title_label.pack(anchor=CENTER, pady=50)
+
 	ship_label = Label(window, image=ship_image)
-	ship_label.pack(anchor=CENTER, pady=(400,0))
+	ship_label.pack(anchor=CENTER, pady=(350,0))
 
-	play_label = Button(window, image=play_image, command=play_menu)
-	play_label.pack(anchor=CENTER, pady=(150,0))
+	play_button = Button(window, image=playbutton_image, command=play_menu)
+	play_button.pack(anchor=CENTER, pady=(150,0))
 
-	back_label = Button(window, image=back_image, command=main_menu)
-	back_label.place(y=1080-152)
+	back_button = Button(window, image=backbutton_image, command=main_menu)
+	back_button.place(y=1080-152)	# minus the height of the image of the back button
 
 def howtoplay_menu():
 	"""How to play the game including controls and objectives"""
@@ -49,8 +50,14 @@ def howtoplay_menu():
 		if widgets != background_label:
 			widgets.destroy()
 
-	back_label = Button(window, image=back_image, command=main_menu)
-	back_label.place(y=1080-152)
+	title_label = Label(window, image=title_image)
+	title_label.pack(anchor=CENTER, pady=50)
+
+	howtoplay_label = Label(window, image=howtoplay_image)
+	howtoplay_label.pack(anchor=CENTER, pady=(100,0))
+
+	back_button = Button(window, image=backbutton_image, command=main_menu)
+	back_button.place(y=1080-152)
 			
 def about_menu():
 	"""Menu with information about the game and credits"""
@@ -59,12 +66,20 @@ def about_menu():
 		if widgets != background_label:
 			widgets.destroy()
 
-	back_label = Button(window, image=back_image, command=main_menu)
-	back_label.place(y=1080-152)
+	title_label = Label(window, image=title_image)
+	title_label.pack(anchor=CENTER, pady=50)
+
+	about_label = Label(window, image=about_image)
+	about_label.pack(anchor=CENTER, pady=(100,0))
+
+	back_button = Button(window, image=backbutton_image, command=main_menu)
+	back_button.place(y=1080-152)
 
 def exit():
 	"""Closes the game"""
+
 	window.destroy()
+
 window = Tk()
 
 window.geometry('900x1080')
@@ -75,11 +90,16 @@ background_label = Label(window, image=background_image)
 background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 title_image = PhotoImage(file="Assets/placeholder.png")
-play_image = PhotoImage(file="Assets/placeholder.png")
-howToPlay_image = PhotoImage(file="Assets/placeholder.png")
+
+playbutton_image = PhotoImage(file="Assets/placeholder.png")
+howtoplaybutton_image = PhotoImage(file="Assets/placeholder.png")
+aboutbutton_image = PhotoImage(file="Assets/placeholder.png")
+exitbutton_image = PhotoImage(file="Assets/placeholder.png")
+backbutton_image = PhotoImage(file="Assets/placeholder.png")
+
+howtoplay_image = PhotoImage(file="Assets/placeholder.png")
 about_image = PhotoImage(file="Assets/placeholder.png")
-exit_image = PhotoImage(file="Assets/placeholder.png")
-back_image = PhotoImage(file="Assets/placeholder.png")
+
 ship_image = PhotoImage(file="Assets/placeholder.png")
 
 main_menu()
