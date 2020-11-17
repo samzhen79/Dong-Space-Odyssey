@@ -37,7 +37,7 @@ def play_menu():
 	ship_label = Label(window, image=ship_image)
 	ship_label.pack(anchor=CENTER, pady=(350,0))
 
-	play_button = Button(window, image=playbutton_image, command=play_menu)
+	play_button = Button(window, image=playbutton_image, command=game_loop)
 	play_button.pack(anchor=CENTER, pady=(150,0))
 
 	back_button = Button(window, image=backbutton_image, command=main_menu)
@@ -79,6 +79,9 @@ def exit():
 	"""Closes the game"""
 
 	window.destroy()
+
+def game_loop():
+	"""The main game"""
 
 window = Tk()
 
