@@ -1,79 +1,65 @@
-from tkinter import Tk, PhotoImage, Label, Button, CENTER
+from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, CENTER, NW, SW, BOTH
 
 def main_menu():
 	"""Main menu"""
 
-	for widgets in window.winfo_children():	#Cleans the window by destroting all the widgets except the background
-		if widgets != background_label:
-			widgets.destroy()
+	canvas.delete("fg")
 
 	title_label = Label(window, image=title_image)
-	title_label.pack(anchor=CENTER, pady=50)
+	title_canvaswindow = canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
 	
 	play_button = Button(window, image=playbutton_image, command=play_menu)
-	play_button.pack(anchor=CENTER, pady=(0,5))
+	play_canvaswindow = canvas.create_window(450,350, anchor=CENTER, window=play_button, tags="fg")
 
 	howtoplay_button = Button(window, image=howtoplaybutton_image, command=howtoplay_menu)
-	howtoplay_button.pack(anchor=CENTER, pady=(5,5))
+	howtoplay_canvaswindow = canvas.create_window(450,550, anchor=CENTER, window=howtoplay_button, tags="fg")
 
 	about_button = Button(window, image=aboutbutton_image, command=about_menu)
-	about_button.pack(anchor=CENTER, pady=(5,5))
+	about_canvaswindow = canvas.create_window(450,750, anchor=CENTER, window=about_button, tags="fg")
 
 	exit_button = Button(window, image=exitbutton_image, command=exit)
-	exit_button.pack(anchor=CENTER, pady=(5,5))
-
-	window.mainloop()
+	exit_canvaswindow = canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
 
 def play_menu():
 	"""Menu for when play is chosen, can choose ships"""
 
-	for widgets in window.winfo_children():
-		if widgets != background_label:
-			widgets.destroy()
+	canvas.delete("fg")
 
-	title_label = Label(window, image=title_image)
-	title_label.pack(anchor=CENTER, pady=50)
-
-	ship_label = Label(window, image=ship_image)
-	ship_label.pack(anchor=CENTER, pady=(350,0))
+	ship = canvas.create_image(450,540,image = ship_image, tags="fg")
 
 	play_button = Button(window, image=playbutton_image, command=game_loop)
-	play_button.pack(anchor=CENTER, pady=(150,0))
+	play_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=play_button, tags="fg")
 
 	back_button = Button(window, image=backbutton_image, command=main_menu)
-	back_button.place(y=1080-152)	# minus the height of the image of the back button
+	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
 def howtoplay_menu():
 	"""How to play the game including controls and objectives"""
 
-	for widgets in window.winfo_children():
-		if widgets != background_label:
-			widgets.destroy()
+	canvas.delete("fg")
 
 	title_label = Label(window, image=title_image)
-	title_label.pack(anchor=CENTER, pady=50)
+	title_canvaswindow = canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
 
 	howtoplay_label = Label(window, image=howtoplay_image)
-	howtoplay_label.pack(anchor=CENTER, pady=(100,0))
+	howtoplay_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=howtoplay_label, tags="fg")
 
 	back_button = Button(window, image=backbutton_image, command=main_menu)
-	back_button.place(y=1080-152)
+	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 			
 def about_menu():
 	"""Menu with information about the game and credits"""
 
-	for widgets in window.winfo_children():	
-		if widgets != background_label:
-			widgets.destroy()
+	canvas.delete("fg")
 
 	title_label = Label(window, image=title_image)
-	title_label.pack(anchor=CENTER, pady=50)
+	title_canvaswindow = canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
 
 	about_label = Label(window, image=about_image)
-	about_label.pack(anchor=CENTER, pady=(100,0))
+	about_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=about_label, tags="fg")
 
 	back_button = Button(window, image=backbutton_image, command=main_menu)
-	back_button.place(y=1080-152)
+	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
 def exit():
 	"""Closes the game"""
@@ -86,11 +72,16 @@ def game_loop():
 window = Tk()
 
 window.geometry('900x1080')
-window.resizable(False, False)
+
+window_width = window.winfo_width()
+window_height = window.winfo_height()
+
+canvas = Canvas(window, width=900, height=1080, bg="blue")
 
 background_image = PhotoImage(file="Assets/bkgd_0.png")
-background_label = Label(window, image=background_image)
-background_label.place(x=0, y=0, relwidth=1, relheight=1)
+canvas.create_image(0,0, anchor=NW, image=background_image)
+
+canvas.pack()
 
 title_image = PhotoImage(file="Assets/placeholder.png")
 
@@ -103,6 +94,8 @@ backbutton_image = PhotoImage(file="Assets/placeholder.png")
 howtoplay_image = PhotoImage(file="Assets/placeholder.png")
 about_image = PhotoImage(file="Assets/placeholder.png")
 
-ship_image = PhotoImage(file="Assets/placeholder.png")
+ship_image = PhotoImage(file="Assets/aship1.gif")
 
 main_menu()
+
+window.mainloop()
