@@ -25,9 +25,12 @@ def play_menu():
 
 	canvas.delete("fg")
 
+	title_label = Label(window, image=title_image)
+	title_canvaswindow = canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
+
 	ship = canvas.create_image(450,540,image = ship_image, tags="fg")
 
-	play_button = Button(window, image=playbutton_image, command=game_loop)
+	play_button = Button(window, image=playbutton_image, command=lambda: difficulty_menu(ship))
 	play_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=play_button, tags="fg")
 
 	back_button = Button(window, image=backbutton_image, command=main_menu)
@@ -61,20 +64,36 @@ def about_menu():
 	back_button = Button(window, image=backbutton_image, command=main_menu)
 	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
+def difficulty_menu(ship):
+	"""Menu to choose difficulty"""
+
+	canvas.delete("fg")
+
+	title_label = Label(window, image=title_image)
+	title_canvaswindow = canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
+
+	easy_button = Button(window, text="Easy", font = ("Arial", 50), command = lambda: game_loop("easy", ship))
+	normal_button = Button(window, text="Normal", font = ("Arial", 50), command = lambda: game_loop("normal", ship))
+	hard_button = Button(window, text="Hard", font = ("Arial", 50), command = lambda: game_loop("hard", ship))
+
+	easy_canvaswindow = canvas.create_window(450, 350, anchor=CENTER, window=easy_button, tags="fg")
+	normal_canvaswindow = canvas.create_window(450, 550, anchor=CENTER, window=normal_button, tags="fg")
+	hard_canvaswindow = canvas.create_window(450, 750, anchor=CENTER, window=hard_button, tags="fg")
+
+	back_button = Button(window, image=backbutton_image, command=main_menu)
+	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+
 def exit():
 	"""Closes the game"""
 
 	window.destroy()
 
-def game_loop():
+def game_loop(difficulty, ship):
 	"""The main game"""
 
 window = Tk()
 
 window.geometry('900x1080')
-
-window_width = window.winfo_width()
-window_height = window.winfo_height()
 
 canvas = Canvas(window, width=900, height=1080, bg="blue")
 
