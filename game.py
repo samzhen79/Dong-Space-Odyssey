@@ -1,9 +1,10 @@
-from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, CENTER, NW, SW, BOTH
+from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, CENTER, N, NW, SW, BOTH
+import configparser
 
 def menu(menutype="default"):
 	"""Creates a menu, takes arguments such that different menus can be chosen"""
 
-	canvas.delete("fg")
+	canvas.delete("fg") #fg for foreground of course, removes all foreground canvas items
 
 	back_button = Button(window, text="Back", font = ("Arial", 50), command=menu)
 
@@ -19,9 +20,9 @@ def menu(menutype="default"):
 
 	elif menutype == "difficulty":
 
-		easy_button = Button(window, text="Easy", font = ("Arial", 50), command = lambda difficulty = "easy", ship = "ship": game_loop(difficulty, ship))
-		normal_button = Button(window, text="Normal", font = ("Arial", 50), command = lambda difficulty = "normal", ship = "ship": game_loop(difficulty, ship))
-		hard_button = Button(window, text="Hard", font = ("Arial", 50), command = lambda difficulty = "hard", ship = "ship": game_loop(difficulty, ship))
+		easy_button = Button(window, text="Easy", font = ("Arial", 50), command = lambda difficulty = "easy", ship = "ship": game_start(difficulty, ship))
+		normal_button = Button(window, text="Normal", font = ("Arial", 50), command = lambda difficulty = "normal", ship = "ship": game_start(difficulty, ship))
+		hard_button = Button(window, text="Hard", font = ("Arial", 50), command = lambda difficulty = "hard", ship = "ship": game_start(difficulty, ship))
 
 		easy_canvaswindow = canvas.create_window(450, 350, anchor=CENTER, window=easy_button, tags="fg")
 		normal_canvaswindow = canvas.create_window(450, 550, anchor=CENTER, window=normal_button, tags="fg")
@@ -60,8 +61,68 @@ def menu(menutype="default"):
 		about_canvaswindow = canvas.create_window(450,750, anchor=CENTER, window=about_button, tags="fg")
 		exit_canvaswindow = canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
 
-def game_loop(difficulty, ship):
-	"""The main game"""
+def game_start(difficulty, ship):
+	"""Starts the game"""
+
+	canvas.delete("fg")
+
+	ship = canvas.create_image(450,1080, anchor = N, image = ship_image, tags="fg")
+
+	settings = configparser.ConfigParser()
+	settings.read("settings.ini")
+
+	# Neat little for loop here to have the ship enter the scene with a simple animation
+	for x in range(40):
+		time.sleep(0.01)
+		canvas.move(ship, 0, -10)
+		window.update()
+
+	global velx, vely
+	velx, vely = 0, 0
+
+	def key_press(event):
+		"""Records key presses for movement"""
+		global velx, vely
+		if event.char == settings["MOVEMENT"]["Forward"] and vely > -4:
+				vely -= 4
+		if event.char == settings["MOVEMENT"]["Backward"] and vely < 4:
+				vely += 4
+		if event.char == settings["MOVEMENT"]["Left"] and velx > -4:
+				velx -= 4
+		if event.char == settings["MOVEMENT"]["Right"] and velx < 4:
+				velx += 4
+
+	def key_release(event):
+		"""Records when key is released for movement"""
+		global velx, vely
+		if event.char == settings["MOVEMENT"]["Forward"]:
+			vely += 4
+		if event.char == settings["MOVEMENT"]["Backward"]:
+			vely -= 4
+		if event.char == settings["MOVEMENT"]["Left"]:
+			velx += 4
+		if event.char == settings["MOVEMENT"]["Right"]:
+			velx -= 4
+
+	def game_loop():
+		"""This is the main game loop"""
+		global x, y, velx, vely
+
+		x, y = 0, 0
+
+		x += velx
+		y += vely
+
+		canvas.move(ship, x, y)
+
+		window.after(10, game_loop)
+
+	canvas.focus_set()
+	canvas.bind("<KeyPress>", key_press)
+	canvas.bind("<KeyRelease>", key_release)
+
+	game_loop()
+
 
 window = Tk()
 
