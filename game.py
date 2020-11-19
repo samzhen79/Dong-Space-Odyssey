@@ -1,11 +1,14 @@
-from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, CENTER, N, NW, SW, BOTH
+from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, messagebox, CENTER, N, NW, SW, BOTH
 import time
-import configparser
+from configparser import ConfigParser
 
 def menu(menutype="default"):
-	"""Creates a menu, takes arguments such that different menus can be chosen"""
+	"""Creates a menu, takes arguments so that different menus can be chosen"""
 
 	canvas.delete("fg") #fg for foreground of course, removes all foreground canvas items
+
+	settings = ConfigParser()
+	settings.read("settings.ini")
 
 	back_button = Button(window, text="Back", font = ("Arial", 50), command=menu)
 
@@ -36,8 +39,14 @@ def menu(menutype="default"):
 
 	elif menutype == "settings":
 
+		global changeshoot_button
+
+		changeshoot_button = Button(window, text="Shoot key is: " + settings["SHOOT"]["Shoot"] + "\nPress to change key.", command = lambda controltype = "SHOOT", control = "Shoot": changekey(controltype, control))
+
 		settings_label = Label(window, text="Settings")
 		settings_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=settings_label, tags="fg")
+
+		changeshoot_canvaswindow = canvas.create_window(450, 350, anchor=CENTER, window=changeshoot_button, tags="fg")
 
 		back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
@@ -48,7 +57,7 @@ def menu(menutype="default"):
 
 		back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")		
 
-	else:
+	else: # This is the default menutype i.e. the main menu
 
 		title_label = Label(window, image=title_image)
 		play_button = Button(window, text="Play", font = ("Arial", 50), command= lambda menutype="play": menu(menutype))
@@ -62,6 +71,31 @@ def menu(menutype="default"):
 		about_canvaswindow = canvas.create_window(450,750, anchor=CENTER, window=about_button, tags="fg")
 		exit_canvaswindow = canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
 
+def changekey(controltype, control):
+
+	def change(event):
+
+		canvas.delete(message_canvaswindow)
+
+		settings = ConfigParser()
+		settings.read("settings.ini")
+		settings.set(controltype, control, event.char)
+
+		with open("settings.ini", "w") as configfile:
+
+			settings.write(configfile)
+
+		settings.read("settings.ini")
+
+		changeshoot_button.config(text = "Shoot key is: " + settings["SHOOT"]["Shoot"] + "\nPress to change key.")
+
+	canvas.bind_all("<Key>", change)
+	
+	message_label = Label(window, text="Press a key...", font = ("Arial", 30), width=500, height=600)
+	message_canvaswindow = canvas.create_window(450, 540, anchor=CENTER, window=message_label, tags="fg")
+
+
+
 def game_start(difficulty, ship):
 	"""Starts the game"""
 
@@ -69,7 +103,7 @@ def game_start(difficulty, ship):
 
 	ship = canvas.create_image(450,1080, anchor = N, image = ship_image, tags="fg")
 
-	settings = configparser.ConfigParser()
+	settings = ConfigParser()
 	settings.read("settings.ini")
 
 	# Neat little for loop here to have the ship enter the scene with a simple animation
@@ -117,6 +151,7 @@ def game_start(difficulty, ship):
 
 		x0, y0, x1, y1 = canvas.bbox(ship)
 
+		# This set of if statements sets the bounds for the ship, if the ship reaches these bounds it will bounce off them.
 		if x0 <= -100:
 			x = 4
 		if x1 >= 1000:
