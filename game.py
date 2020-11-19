@@ -8,16 +8,16 @@ def main_menu():
 	title_label = Label(window, image=title_image)
 	title_canvaswindow = canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
 	
-	play_button = Button(window, image=playbutton_image, command=play_menu)
+	play_button = Button(window, text="Play", font = ("Arial", 50), command=play_menu)
 	play_canvaswindow = canvas.create_window(450,350, anchor=CENTER, window=play_button, tags="fg")
 
-	howtoplay_button = Button(window, image=howtoplaybutton_image, command=howtoplay_menu)
+	howtoplay_button = Button(window, text="How to Play", font = ("Arial", 50), command=howtoplay_menu)
 	howtoplay_canvaswindow = canvas.create_window(450,550, anchor=CENTER, window=howtoplay_button, tags="fg")
 
-	about_button = Button(window, image=aboutbutton_image, command=about_menu)
+	about_button = Button(window, text="About", font = ("Arial", 50), command=about_menu)
 	about_canvaswindow = canvas.create_window(450,750, anchor=CENTER, window=about_button, tags="fg")
 
-	exit_button = Button(window, image=exitbutton_image, command=exit)
+	exit_button = Button(window, text="Exit", font = ("Arial", 50), command=exit)
 	exit_canvaswindow = canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
 
 def play_menu():
@@ -30,10 +30,10 @@ def play_menu():
 
 	ship = canvas.create_image(450,540,image = ship_image, tags="fg")
 
-	play_button = Button(window, image=playbutton_image, command=lambda: difficulty_menu(ship))
+	play_button = Button(window, text="Choose", font = ("Arial", 50),  command=lambda: difficulty_menu(ship))
 	play_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=play_button, tags="fg")
 
-	back_button = Button(window, image=backbutton_image, command=main_menu)
+	back_button = Button(window, text="Back", font = ("Arial", 50), command=main_menu)
 	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
 def howtoplay_menu():
@@ -47,7 +47,7 @@ def howtoplay_menu():
 	howtoplay_label = Label(window, image=howtoplay_image)
 	howtoplay_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=howtoplay_label, tags="fg")
 
-	back_button = Button(window, image=backbutton_image, command=main_menu)
+	back_button = Button(window, text="Back", font = ("Arial", 50), command=main_menu)
 	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 			
 def about_menu():
@@ -61,7 +61,7 @@ def about_menu():
 	about_label = Label(window, image=about_image)
 	about_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=about_label, tags="fg")
 
-	back_button = Button(window, image=backbutton_image, command=main_menu)
+	back_button = Button(window, text="Back", font = ("Arial", 50), command=main_menu)
 	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
 def difficulty_menu(ship):
@@ -80,7 +80,7 @@ def difficulty_menu(ship):
 	normal_canvaswindow = canvas.create_window(450, 550, anchor=CENTER, window=normal_button, tags="fg")
 	hard_canvaswindow = canvas.create_window(450, 750, anchor=CENTER, window=hard_button, tags="fg")
 
-	back_button = Button(window, image=backbutton_image, command=main_menu)
+	back_button = Button(window, text="Back", font = ("Arial", 50), command=play_menu)
 	back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
 def exit():
@@ -103,12 +103,6 @@ canvas.create_image(0,0, anchor=NW, image=background_image)
 canvas.pack()
 
 title_image = PhotoImage(file="Assets/placeholder.png")
-
-playbutton_image = PhotoImage(file="Assets/placeholder.png")
-howtoplaybutton_image = PhotoImage(file="Assets/placeholder.png")
-aboutbutton_image = PhotoImage(file="Assets/placeholder.png")
-exitbutton_image = PhotoImage(file="Assets/placeholder.png")
-backbutton_image = PhotoImage(file="Assets/placeholder.png")
 
 howtoplay_image = PhotoImage(file="Assets/placeholder.png")
 about_image = PhotoImage(file="Assets/placeholder.png")
