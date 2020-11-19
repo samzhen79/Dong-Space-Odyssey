@@ -1,4 +1,5 @@
 from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, CENTER, N, NW, SW, BOTH
+import time
 import configparser
 
 def menu(menutype="default"):
@@ -106,6 +107,7 @@ def game_start(difficulty, ship):
 
 	def game_loop():
 		"""This is the main game loop"""
+
 		global x, y, velx, vely
 
 		x, y = 0, 0
@@ -113,7 +115,18 @@ def game_start(difficulty, ship):
 		x += velx
 		y += vely
 
-		canvas.move(ship, x, y)
+		x0, y0, x1, y1 = canvas.bbox(ship)
+
+		if x0 <= -100:
+			x = 4
+		if x1 >= 1000:
+			x = -4
+		if y0 <= 0:
+			y = 4
+		if y1 >= 1100:
+			y = -4
+
+		canvas.move(ship, x, y) 
 
 		window.after(10, game_loop)
 
