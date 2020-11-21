@@ -38,15 +38,31 @@ def menu(menutype="default"):
 
 
 	elif menutype == "settings":
+		global controls
 
-		global changeshoot_button
+		changeshoot_button = Button(window, text = "Shoot key is: \n' " + settings["CONTROLS"]["Shoot"] + " '\nPress to change key.", font = ("Impact", 18), 
+			command = lambda control = "Shoot", button = 0: changekey(control, button))
+		changeforward_button = Button(window, text = "Forward key is: \n' " + settings["CONTROLS"]["Forward"] + " '\nPress to change key.", font = ("Impact", 18), 
+			command = lambda control = "Forward", button = 1: changekey(control, button))
+		changebackward_button = Button(window, text = "Backward key is: \n' " + settings["CONTROLS"]["Backward"] + " '\nPress to change key.", font = ("Impact", 18), 
+			command = lambda control = "Backward", button = 2: changekey(control, button))
+		changeleft_button = Button(window, text = "Left key is: \n' " + settings["CONTROLS"]["Left"] + " '\nPress to change key.", font = ("Impact", 18), 
+			command = lambda control = "Left", button = 3: changekey(control, button))
+		changeright_button = Button(window, text = "Right key is: \n' " + settings["CONTROLS"]["Right"] + " '\nPress to change key.", font = ("Impact", 18), 
+			command = lambda control = "Right", button = 4: changekey(control, button))
 
-		changeshoot_button = Button(window, text="Shoot key is: " + settings["SHOOT"]["Shoot"] + "\nPress to change key.", command = lambda controltype = "SHOOT", control = "Shoot": changekey(controltype, control))
 
-		settings_label = Label(window, text="Settings")
-		settings_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=settings_label, tags="fg")
+		controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button,changeright_button]
+		settingsTitle = canvas.create_image(450,100, anchor=CENTER, image=settingsTitle_image, tags="fg")
 
-		changeshoot_canvaswindow = canvas.create_window(450, 350, anchor=CENTER, window=changeshoot_button, tags="fg")
+		controlsTitle = canvas.create_image(450,200, anchor=CENTER, image=controlsTitle_image, tags="fg")
+
+		changeshoot_canvaswindow = canvas.create_window(450, 300, anchor=CENTER, window=changeshoot_button, tags="fg")
+
+		changeforward_canvaswindow = canvas.create_window(450, 450, anchor=CENTER, window=changeforward_button, tags="fg")
+		changebackward_canvaswindow = canvas.create_window(450, 575, anchor=CENTER, window=changebackward_button, tags="fg")
+		changeleft_canvaswindow = canvas.create_window(225, 500, anchor=CENTER, window=changeleft_button, tags="fg")
+		changeright_canvaswindow = canvas.create_window(675, 500, anchor=CENTER, window=changeright_button, tags="fg")
 
 		back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
@@ -71,15 +87,15 @@ def menu(menutype="default"):
 		about_canvaswindow = canvas.create_window(450,750, anchor=CENTER, window=about_button, tags="fg")
 		exit_canvaswindow = canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
 
-def changekey(controltype, control):
+def changekey(control, button):
 
-	def change(event):
-
+	def change(key):
+		global controls
 		canvas.delete(message_canvaswindow)
 
 		settings = ConfigParser()
 		settings.read("settings.ini")
-		settings.set(controltype, control, event.char)
+		settings.set("CONTROLS", control, key.keysym)
 
 		with open("settings.ini", "w") as configfile:
 
@@ -87,14 +103,12 @@ def changekey(controltype, control):
 
 		settings.read("settings.ini")
 
-		changeshoot_button.config(text = "Shoot key is: " + settings["SHOOT"]["Shoot"] + "\nPress to change key.")
+		controls[button].config(text = control + " key is: \n' " + settings["CONTROLS"][control] + " '\nPress to change key.")
 
-	canvas.bind_all("<Key>", change)
-	
 	message_label = Label(window, text="Press a key...", font = ("Arial", 30), width=500, height=600)
 	message_canvaswindow = canvas.create_window(450, 540, anchor=CENTER, window=message_label, tags="fg")
 
-
+	canvas.bind_all("<Key>", change)
 
 def game_start(difficulty, ship):
 	"""Starts the game"""
@@ -139,6 +153,9 @@ def game_start(difficulty, ship):
 		if event.char == settings["MOVEMENT"]["Right"]:
 			velx -= 4
 
+	canvas.bind("<KeyPress>", key_press)
+	canvas.bind("<KeyRelease>", key_release)
+
 	def game_loop():
 		"""This is the main game loop"""
 
@@ -165,10 +182,6 @@ def game_start(difficulty, ship):
 
 		window.after(10, game_loop)
 
-	canvas.focus_set()
-	canvas.bind("<KeyPress>", key_press)
-	canvas.bind("<KeyRelease>", key_release)
-
 	game_loop()
 
 
@@ -185,9 +198,13 @@ canvas.pack()
 
 title_image = PhotoImage(file="Assets/placeholder.png")
 
+settingsTitle_image = PhotoImage(file="Assets/settings.png")
+controlsTitle_image = PhotoImage(file="Assets/controls.png")
+
+
 about_image = PhotoImage(file="Assets/placeholder.png")
 
-ship_image = PhotoImage(file="Assets/aship1.gif")
+ship_image = PhotoImage(file="Assets/aship1.png")
 
 menu()
 
