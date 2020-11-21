@@ -52,7 +52,7 @@ def menu(menutype="default"):
 			command = lambda control = "Right", button = 4: changekey(control, button))
 
 
-		controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button,changeright_button]
+		controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button,changeright_button] #This is needed to update the key shown on the button
 		settingsTitle = canvas.create_image(450,100, anchor=CENTER, image=settingsTitle_image, tags="fg")
 
 		controlsTitle = canvas.create_image(450,200, anchor=CENTER, image=controlsTitle_image, tags="fg")
@@ -88,10 +88,12 @@ def menu(menutype="default"):
 		exit_canvaswindow = canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
 
 def changekey(control, button):
-
+	"""Starts the control key change process, takes the specific control being changed and the value of the button that was pressed"""
 	def change(key):
+		"""Changes the key in the settings.ini file to a key the user presses"""
+
 		global controls
-		canvas.delete(message_canvaswindow)
+		canvas.delete(keyprompt_canvaswindow) 
 
 		settings = ConfigParser()
 		settings.read("settings.ini")
@@ -105,8 +107,8 @@ def changekey(control, button):
 
 		controls[button].config(text = control + " key is: \n' " + settings["CONTROLS"][control] + " '\nPress to change key.")
 
-	message_label = Label(window, text="Press a key...", font = ("Arial", 30), width=500, height=600)
-	message_canvaswindow = canvas.create_window(450, 540, anchor=CENTER, window=message_label, tags="fg")
+	keyprompt_label = Label(window, text="Press a key...", font = ("Arial", 30), width=500, height=600)
+	keyprompt_canvaswindow = canvas.create_window(450, 540, anchor=CENTER, window=message_label, tags="fg")
 
 	canvas.bind_all("<Key>", change)
 
@@ -117,6 +119,14 @@ def game_start(difficulty, ship):
 
 	ship = canvas.create_image(450,1080, anchor = N, image = ship_image, tags="fg")
 
+	ship_stats = {
+		"type": 1,
+		"health": 100,
+		"level": 1,
+		"fireratemultiplier":	1,
+		"damagemultiplier": 1,
+	}
+
 	settings = ConfigParser()
 	settings.read("settings.ini")
 
@@ -126,40 +136,56 @@ def game_start(difficulty, ship):
 		canvas.move(ship, 0, -10)
 		window.update()
 
-	global velx, vely
-	velx, vely = 0, 0
+	global maxvelocity, velx, vely, shoot
+	maxvelocity, velx, vely, shoot = 10, 0, 0, False
 
+	#Player Movement and shooting
 	def key_press(event):
-		"""Records key presses for movement"""
-		global velx, vely
-		if event.char == settings["MOVEMENT"]["Forward"] and vely > -4:
-				vely -= 4
-		if event.char == settings["MOVEMENT"]["Backward"] and vely < 4:
-				vely += 4
-		if event.char == settings["MOVEMENT"]["Left"] and velx > -4:
-				velx -= 4
-		if event.char == settings["MOVEMENT"]["Right"] and velx < 4:
-				velx += 4
+		"""Records key presses for movement and shooting"""
+		global velx, vely, shoot
+
+		#Movement
+		if event.keysym == settings["CONTROLS"]["Forward"] and vely > -maxvelocity:
+				vely -= maxvelocity
+		if event.keysym == settings["CONTROLS"]["Backward"] and vely < maxvelocity:
+				vely += maxvelocity
+		if event.keysym == settings["CONTROLS"]["Left"] and velx > -maxvelocity:
+				velx -= maxvelocity
+		if event.keysym == settings["CONTROLS"]["Right"] and velx < maxvelocity:
+				velx += maxvelocity
+
+		#Shooting
+		if event.keysym == settings["CONTROLS"]["Shoot"]:
+
+			shoot = True
 
 	def key_release(event):
-		"""Records when key is released for movement"""
-		global velx, vely
-		if event.char == settings["MOVEMENT"]["Forward"]:
-			vely += 4
-		if event.char == settings["MOVEMENT"]["Backward"]:
-			vely -= 4
-		if event.char == settings["MOVEMENT"]["Left"]:
-			velx += 4
-		if event.char == settings["MOVEMENT"]["Right"]:
-			velx -= 4
+		"""Records when key is released for movement and shooting"""
+		global maxvelocity,velx, vely, shoot
 
-	canvas.bind("<KeyPress>", key_press)
-	canvas.bind("<KeyRelease>", key_release)
+		#Movement
+		if event.keysym == settings["CONTROLS"]["Forward"]:
+			vely += maxvelocity
+		if event.keysym == settings["CONTROLS"]["Backward"]:
+			vely -= maxvelocity
+		if event.keysym == settings["CONTROLS"]["Left"]:
+			velx += maxvelocity
+		if event.keysym == settings["CONTROLS"]["Right"]:
+			velx -= maxvelocity
+
+		#Shooting
+		if event.keysym == settings["CONTROLS"]["Shoot"]:
+
+			shoot = False
+
+	canvas.bind_all("<KeyPress>", key_press)
+	canvas.bind_all("<KeyRelease>", key_release)
+
 
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely
+		global x, y, velx, vely, shoot
 
 		x, y = 0, 0
 
@@ -170,17 +196,23 @@ def game_start(difficulty, ship):
 
 		# This set of if statements sets the bounds for the ship, if the ship reaches these bounds it will bounce off them.
 		if x0 <= -100:
-			x = 4
+			x = maxvelocity
 		if x1 >= 1000:
-			x = -4
+			x = -maxvelocity
 		if y0 <= 0:
-			y = 4
+			y = maxvelocity
 		if y1 >= 1100:
-			y = -4
+			y = -maxvelocity
 
-		canvas.move(ship, x, y) 
+		canvas.move(ship, x, y)
 
-		window.after(10, game_loop)
+		if shoot == True:
+			canvas.create_image(x0,y0, image = playerlaserstraight_image, tag=("fg","playerbullet"))
+			
+		canvas.move("playerbullet", 0 , -100)
+
+
+		window.after(30, game_loop)
 
 	game_loop()
 
@@ -205,6 +237,8 @@ controlsTitle_image = PhotoImage(file="Assets/controls.png")
 about_image = PhotoImage(file="Assets/placeholder.png")
 
 ship_image = PhotoImage(file="Assets/aship1.png")
+
+playerlaserstraight_image = PhotoImage(file="Assets/playerlaserstraight.png")
 
 menu()
 
