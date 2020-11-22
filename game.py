@@ -14,12 +14,24 @@ def menu(menutype="default"):
 
 	if menutype == "play":
 
+		newgame_button = Button(window, text="New Game", font = ("Impact", 50), command = lambda menutype="chooseship": menu(menutype))
+		loadgame_button = Button(window, text="Load Game", font = ("Impact", 50), command = lambda difficulty = None, ship = None, state="saved": game_start(difficulty, ship, state))
+
+
+		canvas.create_window(450, 350, anchor=CENTER, window=newgame_button, tags="fg")
+		canvas.create_window(450, 550, anchor=CENTER, window=loadgame_button, tags="fg")
+
+		canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+
+	elif menutype == "chooseship":
+
 		ship = canvas.create_image(450,540,image = ship_image, tags="fg")
 
 		choose_button = Button(window, text="Choose", font = ("Arial", 50),  command=lambda menutype="difficulty": menu(menutype))
-		choose_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=choose_button, tags="fg")
+		canvas.create_window(450,800, anchor=CENTER, window=choose_button, tags="fg")
 
-		back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+		back_button.config(command = lambda menutype="play": menu(menutype))
+		canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
 
 	elif menutype == "difficulty":
@@ -28,13 +40,13 @@ def menu(menutype="default"):
 		normal_button = Button(window, text="Normal", font = ("Arial", 50), command = lambda difficulty = "normal", ship = "ship": game_start(difficulty, ship))
 		hard_button = Button(window, text="Hard", font = ("Arial", 50), command = lambda difficulty = "hard", ship = "ship": game_start(difficulty, ship))
 
-		easy_canvaswindow = canvas.create_window(450, 350, anchor=CENTER, window=easy_button, tags="fg")
-		normal_canvaswindow = canvas.create_window(450, 550, anchor=CENTER, window=normal_button, tags="fg")
-		hard_canvaswindow = canvas.create_window(450, 750, anchor=CENTER, window=hard_button, tags="fg")#
+		canvas.create_window(450, 350, anchor=CENTER, window=easy_button, tags="fg")
+		canvas.create_window(450, 550, anchor=CENTER, window=normal_button, tags="fg")
+		canvas.create_window(450, 750, anchor=CENTER, window=hard_button, tags="fg")
 
 
-		back_button.config(command = lambda menutype="play": menu(menutype))
-		back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+		back_button.config(command = lambda menutype="chooseship": menu(menutype))
+		canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
 
 	elif menutype == "settings":
@@ -50,21 +62,23 @@ def menu(menutype="default"):
 			command = lambda control = "Left", button = 3: changekey(control, button))
 		changeright_button = Button(window, text = "Right key is: \n' " + settings["CONTROLS"]["Right"] + " '\nPress to change key.", font = ("Impact", 18), 
 			command = lambda control = "Right", button = 4: changekey(control, button))
+		changepause_button = Button(window, text = "Pause key is: \n' " + settings["CONTROLS"]["Pause"] + " '\nPress to change key.", font = ("Impact", 18), 
+			command = lambda control = "Pause", button = 5: changekey(control, button))
 
+		controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button, changeright_button, changepause_button] #This is needed to update the key shown on the button
+		canvas.create_image(450,100, anchor=CENTER, image=settingsTitle_image, tags="fg")
 
-		controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button,changeright_button] #This is needed to update the key shown on the button
-		settingsTitle = canvas.create_image(450,100, anchor=CENTER, image=settingsTitle_image, tags="fg")
+		canvas.create_image(450,200, anchor=CENTER, image=controlsTitle_image, tags="fg")
 
-		controlsTitle = canvas.create_image(450,200, anchor=CENTER, image=controlsTitle_image, tags="fg")
+		canvas.create_window(450, 300, anchor=CENTER, window=changeshoot_button, tags="fg")
 
-		changeshoot_canvaswindow = canvas.create_window(450, 300, anchor=CENTER, window=changeshoot_button, tags="fg")
+		canvas.create_window(450, 450, anchor=CENTER, window=changeforward_button, tags="fg")
+		canvas.create_window(450, 575, anchor=CENTER, window=changebackward_button, tags="fg")
+		canvas.create_window(225, 500, anchor=CENTER, window=changeleft_button, tags="fg")
+		canvas.create_window(675, 500, anchor=CENTER, window=changeright_button, tags="fg")
+		canvas.create_window(450, 725, anchor=CENTER, window=changepause_button, tags="fg")
 
-		changeforward_canvaswindow = canvas.create_window(450, 450, anchor=CENTER, window=changeforward_button, tags="fg")
-		changebackward_canvaswindow = canvas.create_window(450, 575, anchor=CENTER, window=changebackward_button, tags="fg")
-		changeleft_canvaswindow = canvas.create_window(225, 500, anchor=CENTER, window=changeleft_button, tags="fg")
-		changeright_canvaswindow = canvas.create_window(675, 500, anchor=CENTER, window=changeright_button, tags="fg")
-
-		back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+		canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
 
 	elif menutype == "about":
 
@@ -81,11 +95,11 @@ def menu(menutype="default"):
 		about_button = Button(window, text="About", font = ("Arial", 50), command= lambda menutype="about": menu(menutype))
 		exit_button = Button(window, text="Exit", font = ("Arial", 50), command= lambda: window.destroy())
 
-		title_canvaswindow = canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
-		play_canvaswindow = canvas.create_window(450,350, anchor=CENTER, window=play_button, tags="fg")
-		settings_canvaswindow = canvas.create_window(450,550, anchor=CENTER, window=settings_button, tags="fg")
-		about_canvaswindow = canvas.create_window(450,750, anchor=CENTER, window=about_button, tags="fg")
-		exit_canvaswindow = canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
+		canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
+		canvas.create_window(450,350, anchor=CENTER, window=play_button, tags="fg")
+		canvas.create_window(450,550, anchor=CENTER, window=settings_button, tags="fg")
+		canvas.create_window(450,750, anchor=CENTER, window=about_button, tags="fg")
+		canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
 
 def changekey(control, button):
 	"""Starts the control key change process, takes the specific control being changed and the value of the button that was pressed"""
@@ -107,74 +121,86 @@ def changekey(control, button):
 
 		controls[button].config(text = control + " key is: \n' " + settings["CONTROLS"][control] + " '\nPress to change key.")
 
+		window.unbind("<Key>")
+
 	keyprompt_label = Label(window, text="Press a key...", font = ("Arial", 30), width=500, height=600)
-	keyprompt_canvaswindow = canvas.create_window(450, 540, anchor=CENTER, window=message_label, tags="fg")
+	keyprompt_canvaswindow = canvas.create_window(450, 540, anchor=CENTER, window=keyprompt_label, tags="fg")
 
-	canvas.bind_all("<Key>", change)
+	window.bind("<Key>", change)
 
-def game_start(difficulty, ship):
+def game_start(difficulty, ship, state="new"):
 	"""Starts the game"""
 
 	canvas.delete("fg")
 
-	ship = canvas.create_image(450,1080, anchor = N, image = ship_image, tags="fg")
+	global maxvelocity, velx, vely, shoot, interval, pausestate
+	maxvelocity = 10
+	velx, vely = 0, 0
+	shoot, interval, pausestate = False, False, False
 
-	ship_stats = {
-		"type": 1,
-		"health": 100,
-		"level": 1,
-		"fireratemultiplier":	1,
-		"damagemultiplier": 1,
-	}
+	if state == "new": # New Game
+
+		ship = canvas.create_image(450,1080, anchor = N, image = ship_image, tags=("fg", "game"))
+
+		ship_stats = {
+			"type": 1,
+			"health": 100,
+			"level": 1,
+			"fireratemultiplier":	1,
+			"damagemultiplier": 1,
+		}
+
+		# Neat little for loop here to have the ship enter the scene with a simple animation
+		for x in range(40):
+			time.sleep(0.01)
+			canvas.move(ship, 0, -10)
+			window.update()
+
+	elif state == "saved": # Load saved game, if no saved game available then starts a new game
+		pass
 
 	settings = ConfigParser()
 	settings.read("settings.ini")
 
-	# Neat little for loop here to have the ship enter the scene with a simple animation
-	for x in range(40):
-		time.sleep(0.01)
-		canvas.move(ship, 0, -10)
-		window.update()
-
-	global maxvelocity, velx, vely, shoot
-	maxvelocity, velx, vely, shoot = 10, 0, 0, False
-
 	#Player Movement and shooting
 	def key_press(event):
-		"""Records key presses for movement and shooting"""
-		global velx, vely, shoot
+		"""Records key presses for controls"""
+		global velx, vely, shoot, pausestate
 
 		#Movement
-		if event.keysym == settings["CONTROLS"]["Forward"] and vely > -maxvelocity:
+		if event.keysym.upper() == settings["CONTROLS"]["Forward"].upper() and vely > -maxvelocity:
 				vely -= maxvelocity
-		if event.keysym == settings["CONTROLS"]["Backward"] and vely < maxvelocity:
+		if event.keysym.upper() == settings["CONTROLS"]["Backward"].upper() and vely < maxvelocity:
 				vely += maxvelocity
-		if event.keysym == settings["CONTROLS"]["Left"] and velx > -maxvelocity:
+		if event.keysym.upper() == settings["CONTROLS"]["Left"].upper() and velx > -maxvelocity:
 				velx -= maxvelocity
-		if event.keysym == settings["CONTROLS"]["Right"] and velx < maxvelocity:
+		if event.keysym.upper() == settings["CONTROLS"]["Right"].upper() and velx < maxvelocity:
 				velx += maxvelocity
 
 		#Shooting
-		if event.keysym == settings["CONTROLS"]["Shoot"]:
+		if event.keysym.upper() == settings["CONTROLS"]["Shoot"].upper():
 
 			shoot = True
 
+		#Pause
+		if event.keysym.upper() == settings["CONTROLS"]["Pause"].upper():
+			pausestate = True
 	def key_release(event):
-		"""Records when key is released for movement and shooting"""
-		global maxvelocity,velx, vely, shoot
+		"""Records when a key is released for movement and shooting"""
+		global maxvelocity, velx, vely, shoot
 
 		#Movement
-		if event.keysym == settings["CONTROLS"]["Forward"]:
+		if event.keysym.upper() == settings["CONTROLS"]["Forward"].upper():
 			vely += maxvelocity
-		if event.keysym == settings["CONTROLS"]["Backward"]:
+		if event.keysym.upper() == settings["CONTROLS"]["Backward"].upper():
 			vely -= maxvelocity
-		if event.keysym == settings["CONTROLS"]["Left"]:
+		if event.keysym.upper() == settings["CONTROLS"]["Left"].upper():
 			velx += maxvelocity
-		if event.keysym == settings["CONTROLS"]["Right"]:
+		if event.keysym.upper() == settings["CONTROLS"]["Right"].upper():
 			velx -= maxvelocity
 
 		#Shooting
-		if event.keysym == settings["CONTROLS"]["Shoot"]:
+		if event.keysym.upper() == settings["CONTROLS"]["Shoot"].upper():
 
 			shoot = False
 
@@ -185,7 +211,10 @@ def game_start(difficulty, ship):
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely, shoot
+		global x, y, velx, vely, shoot, interval, pausestate
+
+		canvas.itemconfig("game",state = "normal" )
+		canvas.delete("pausebutton")
 
 		x, y = 0, 0
 
@@ -207,12 +236,39 @@ def game_start(difficulty, ship):
 		canvas.move(ship, x, y)
 
 		if shoot == True:
-			canvas.create_image(x0,y0, image = playerlaserstraight_image, tag=("fg","playerbullet"))
+			canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","playerbullet","straight","game"))
+			canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","playerbullet","straight","game"))
+			interval = not(interval)
+			# if interval == True:
+			# 	canvas.create_image(x1,y1, image = playerlaserround_image, tag = ("fg","playerbullet","round"))
 			
-		canvas.move("playerbullet", 0 , -100)
+		canvas.move("straight", 0 , -100)
+		# canvas.move("round", 0 , -150)
+
+		if pausestate == True:
+
+			canvas.itemconfig("game",state = "hidden" )
+
+			file = open("savestate.txt", "w")
+
+			for item in canvas.find_withtag("game"):
+
+				file.write(str(canvas.coords(item)) + " " + str(canvas.itemconfigure(item)) + "\n")
+
+			file.close()
+
+			resume_button =  Button(window, text="Resume", font = ("Impact", 50), command = game_loop )
+			mainmenu_button =  Button(window, text="Main Menu", font = ("Impact", 50), command = menu )
+
+			canvas.create_window(450,300, anchor=CENTER, window=resume_button, tags=("fg", "pausebutton"))
+			canvas.create_window(450,500, anchor=CENTER, window=mainmenu_button, tags=("fg", "pausebutton"))
+
+			pausestate = False
 
 
-		window.after(30, game_loop)
+
+		else:
+			window.after(16, game_loop)
 
 	game_loop()
 
@@ -228,17 +284,18 @@ canvas.create_image(0,0, anchor=NW, image=background_image)
 
 canvas.pack()
 
-title_image = PhotoImage(file="Assets/placeholder.png")
 
+#Menu Titles
+title_image = PhotoImage(file="Assets/placeholder.png")
 settingsTitle_image = PhotoImage(file="Assets/settings.png")
 controlsTitle_image = PhotoImage(file="Assets/controls.png")
-
-
 about_image = PhotoImage(file="Assets/placeholder.png")
 
-ship_image = PhotoImage(file="Assets/aship1.png")
 
+#Player Ship 
+ship_image = PhotoImage(file="Assets/aship1.png")
 playerlaserstraight_image = PhotoImage(file="Assets/playerlaserstraight.png")
+playerlaserround_image = PhotoImage(file="Assets/playerlaserround.png")
 
 menu()
 
