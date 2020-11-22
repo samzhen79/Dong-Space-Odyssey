@@ -133,10 +133,11 @@ def game_start(difficulty, ship, state="new"):
 
 	canvas.delete("fg")
 
-	global maxvelocity, velx, vely, shoot, interval, pausestate
+	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate
 	maxvelocity = 10
 	velx, vely = 0, 0
 	shoot, interval, pausestate = False, False, False
+	savestate = open("savestate.txt", "w")
 
 	if state == "new": # New Game
 
@@ -211,11 +212,21 @@ def game_start(difficulty, ship, state="new"):
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely, shoot, interval, pausestate
+		global x, y, velx, vely, shoot, interval, pausestate, savestate
+
+		savestate.seek(0)
+		savestate.truncate(0)
 
 		canvas.itemconfig("game",state = "normal" )
 		canvas.delete("pausebutton")
 
+		def onclose():
+			savestate.close()
+			window.destroy()
+
+		window.protocol("WM_DELETE_WINDOW", onclose)
+
+		#Movement
 		x, y = 0, 0
 
 		x += velx
@@ -223,7 +234,7 @@ def game_start(difficulty, ship, state="new"):
 
 		x0, y0, x1, y1 = canvas.bbox(ship)
 
-		# This set of if statements sets the bounds for the ship, if the ship reaches these bounds it will bounce off them.
+			# This set of if statements sets the bounds for the ship, if the ship reaches these bounds it will bounce off them.
 		if x0 <= -100:
 			x = maxvelocity
 		if x1 >= 1000:
@@ -235,27 +246,31 @@ def game_start(difficulty, ship, state="new"):
 
 		canvas.move(ship, x, y)
 
+		#Shooting
 		if shoot == True:
-			canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","playerbullet","straight","game"))
-			canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","playerbullet","straight","game"))
+			canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
+			canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
 			interval = not(interval)
 			# if interval == True:
 			# 	canvas.create_image(x1,y1, image = playerlaserround_image, tag = ("fg","playerbullet","round"))
-			
+	
 		canvas.move("straight", 0 , -100)
 		# canvas.move("round", 0 , -150)
 
+		for bullet in canvas.find_withtag("bullet"): # Clears bullets that exit the canvas
+			if canvas.coords(bullet)[1] <= -100:
+				canvas.delete(bullet)
+
+		# Autosave
+
+		for item in canvas.find_withtag("game"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
+
+			savestate.write(str(canvas.coords(item)) + " " + str(canvas.itemconfigure(item)) + "\n")
+
+		#Pausing
 		if pausestate == True:
 
 			canvas.itemconfig("game",state = "hidden" )
-
-			file = open("savestate.txt", "w")
-
-			for item in canvas.find_withtag("game"):
-
-				file.write(str(canvas.coords(item)) + " " + str(canvas.itemconfigure(item)) + "\n")
-
-			file.close()
 
 			resume_button =  Button(window, text="Resume", font = ("Impact", 50), command = game_loop )
 			mainmenu_button =  Button(window, text="Main Menu", font = ("Impact", 50), command = menu )
@@ -263,9 +278,9 @@ def game_start(difficulty, ship, state="new"):
 			canvas.create_window(450,300, anchor=CENTER, window=resume_button, tags=("fg", "pausebutton"))
 			canvas.create_window(450,500, anchor=CENTER, window=mainmenu_button, tags=("fg", "pausebutton"))
 
+			savestate.close()
+			savestate = open("savestate","w")
 			pausestate = False
-
-
 
 		else:
 			window.after(16, game_loop)
