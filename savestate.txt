@@ -1,2 +1,2 @@
-156, []
-[500.0, 620.0]~{'activeimage': ('activeimage', '', '', '', ''), 'anchor': ('anchor', '', '', 'center', 'n'), 'disabledimage': ('disabledimage', '', '', '', ''), 'image': ('image', '', '', '', 'pyimage6'), 'state': ('state', '', '', '', 'normal'), 'tags': ('tags', '', '', '', 'fg game ship shipbody')}
+344~{"type": 1, "health": 100, "level": 1, "fireratemultiplier": 1, "damagemultiplier": 1}~[]
+[540.0, 700.0]~{'activeimage': ('activeimage', '', '', '', ''), 'anchor': ('anchor', '', '', 'center', 'n'), 'disabledimage': ('disabledimage', '', '', '', ''), 'image': ('image', '', '', '', 'pyimage6'), 'state': ('state', '', '', '', 'normal'), 'tags': ('tags', '', '', '', 'fg game ship shipbody')}

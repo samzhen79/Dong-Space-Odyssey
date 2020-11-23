@@ -1,6 +1,7 @@
 from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, messagebox, CENTER, N, NW, SW, BOTH
 import time
 from configparser import ConfigParser
+import json
 
 def menu(menutype="default"):
 	"""Creates a menu, takes arguments so that different menus can be chosen"""
@@ -165,7 +166,7 @@ def game_start(difficulty, ship, state="new"):
 		file = open("savestate.txt", "r")
 		check = file.read(1)
 
-		if not check:
+		if not check:	# If no saved game then start new game
 
 			file.close()
 			menu("chooseship")
@@ -173,23 +174,22 @@ def game_start(difficulty, ship, state="new"):
 
 		else:
 
-			ship_stats = {	#Remember to implement read from file also for gametime
-				"type": 1,
-				"health": 100,
-				"level": 1,
-				"fireratemultiplier":	1,
-				"damagemultiplier": 1,
-			}
 			savestateobjects = file.read().splitlines()
-			for object in savestateobjects:
+
+			information = savestateobjects[0].split("~")
+			gametime = int(information[0])
+			ship_stats = json.loads(information[1])
+			enemylist = json.loads(information[2])
+
+			for object in savestateobjects[1:]:
 				#This code is needed to interpret the savestate.txt, Effectively splits the text file into the necessary parts and then cleans each part until it is useable in create_image()
 				object = object.split("~")
 
-				coords = object[1].replace("[", "")
+				coords = object[0].replace("[", "")
 				coords = coords.replace("]", "")
 				coords = coords.split(", ")
 
-				config = object[2][1:-1].replace("'',","")
+				config = object[1][1:-1].replace("'',","")
 				config = config.split("), ")
 
 				anchor = config[1][34:-1]
@@ -206,6 +206,12 @@ def game_start(difficulty, ship, state="new"):
 				tagstring = tagstring[0:-2]
 				#creates the needed objects from the interpreted savestate.txt
 				canvas.create_image(coords[0], coords[1], anchor = anchor, image = image, tags = (eval(tagstring)))
+
+			i = 0
+
+			for enemy in canvas.find_withtag("enemy"):
+				enemylist[i][0]=enemy
+				i+1
 
 			file.close()
 			savestate = open("savestate.txt", "w")
@@ -262,7 +268,7 @@ def game_start(difficulty, ship, state="new"):
 	def enemy_spawn(type, spawnx, spawny, movement):
 		"""Spawn an enemy entity"""
 		if type == 1:
-			enemy = canvas.create_image(spawnx, spawny, image = enemy1_image, tag=("fg","enemy"))
+			enemy = canvas.create_image(spawnx, spawny, image = enemy1_image, tag=("fg","enemy","game"))
 			enemystats = {
 				"type": 1,
 				"health" : 50,
@@ -339,13 +345,13 @@ def game_start(difficulty, ship, state="new"):
 
 
 		#Collisions and Damage
-		for enemy in enemylist:		#Checks every enemy
+		for enemy in enemylist:
 
 			enemystats = enemy[1]
 			enemyitem = enemy[0]
 			enemybbox = canvas.bbox(enemyitem)
 
-			for bullet in canvas.find_withtag("playerbullet"): #Checks every bullet
+			for bullet in canvas.find_withtag("playerbullet"):
 
 				bulletbbox = canvas.bbox(bullet)
 
@@ -369,7 +375,7 @@ def game_start(difficulty, ship, state="new"):
 
 
 		#Autosave
-		savestate.write(str(gametime) + ", " + str(enemylist) + "\n")
+		savestate.write(str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "\n")
 		for item in canvas.find_withtag("game"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
 
 			savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
