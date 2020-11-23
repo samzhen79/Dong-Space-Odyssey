@@ -133,9 +133,9 @@ def game_start(difficulty, ship, state="new"):
 
 	canvas.delete("fg")
 
-	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate
+	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, ship_stats
 	maxvelocity = 10
-	velx, vely = 0, 0
+	velx, vely, gametime = 0, 0, 0
 	shoot, interval, pausestate = False, False, False
 
 	if state == "new": # New Game
@@ -149,6 +149,8 @@ def game_start(difficulty, ship, state="new"):
 			"fireratemultiplier":	1,
 			"damagemultiplier": 1,
 		}
+
+		enemylist = []
 
 		# Neat little for loop here to have the ship enter the scene with a simple animation
 		for x in range(40):
@@ -170,16 +172,24 @@ def game_start(difficulty, ship, state="new"):
 			return
 
 		else:
+
+			ship_stats = {	#Remember to implement read from file also for gametime
+				"type": 1,
+				"health": 100,
+				"level": 1,
+				"fireratemultiplier":	1,
+				"damagemultiplier": 1,
+			}
 			savestateobjects = file.read().splitlines()
 			for object in savestateobjects:
 				#This code is needed to interpret the savestate.txt, Effectively splits the text file into the necessary parts and then cleans each part until it is useable in create_image()
 				object = object.split("~")
 
-				coords = object[0].replace("[", "")
+				coords = object[1].replace("[", "")
 				coords = coords.replace("]", "")
 				coords = coords.split(", ")
 
-				config = object[1][1:-1].replace("'',","")
+				config = object[2][1:-1].replace("'',","")
 				config = config.split("), ")
 
 				anchor = config[1][34:-1]
@@ -249,19 +259,31 @@ def game_start(difficulty, ship, state="new"):
 	canvas.bind_all("<KeyPress>", key_press)
 	canvas.bind_all("<KeyRelease>", key_release)
 
+	def enemy_spawn(type, spawnx, spawny, movement):
+		"""Spawn an enemy entity"""
+		if type == 1:
+			enemy = canvas.create_image(spawnx, spawny, image = enemy1_image, tag=("fg","enemy"))
+			enemystats = {
+				"type": 1,
+				"health" : 50,
+				"movement" : movement
+			}
+			return enemy, enemystats
 
 	def saveonclose():
+		"""Saves the game state on window close"""
 		savestate.close()
 		window.destroy()
 
 	def saveonreturn():
+		"""Saves the game state when returning to main menu"""
 		savestate.close()
 		menu()
 
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely, shoot, interval, pausestate, savestate
+		global x, y, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist
 
 		savestate.seek(0)
 		savestate.truncate(0)
@@ -271,7 +293,8 @@ def game_start(difficulty, ship, state="new"):
 
 		window.protocol("WM_DELETE_WINDOW", saveonclose)
 
-		#Movement
+
+		#Player Movement
 		x, y = 0, 0
 
 		x += velx
@@ -279,7 +302,7 @@ def game_start(difficulty, ship, state="new"):
 
 		x0, y0, x1, y1 = canvas.bbox("shipbody")
 
-		# This set of if statements sets the bounds for the ship, if the ship reaches these bounds it will bounce off them.
+			#This set of if statements sets the bounds for the ship, if the ship reaches these bounds it will bounce off them.
 		if x0 <= -100:
 			x = maxvelocity
 		if x1 >= 1000:
@@ -291,11 +314,16 @@ def game_start(difficulty, ship, state="new"):
 
 		canvas.move("ship", x, y)
 
-		#Shooting
+
+		# Player Shooting
 		if shoot == True:
+
 			canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
 			canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
+
 			interval = not(interval)
+
+			#For creating round bullets on higher ship levels
 			# if interval == True:
 			# 	canvas.create_image(x1,y1, image = playerlaserround_image, tag = ("fg","playerbullet","round"))
 	
@@ -306,11 +334,46 @@ def game_start(difficulty, ship, state="new"):
 			if canvas.coords(bullet)[1] <= -100:
 				canvas.delete(bullet)
 
-		#Autosave
 
+		#Enemy Movement
+
+
+		#Collisions and Damage
+		for enemy in enemylist:		#Checks every enemy
+
+			enemystats = enemy[1]
+			enemyitem = enemy[0]
+			enemybbox = canvas.bbox(enemyitem)
+
+			for bullet in canvas.find_withtag("playerbullet"): #Checks every bullet
+
+				bulletbbox = canvas.bbox(bullet)
+
+				if (bulletbbox[1] <= enemybbox[3]) and (bulletbbox[2] >= enemybbox[0]) and (bulletbbox[0] <= enemybbox[2]): #If the bullet is within the bounds of the enemy ship (Does not account for bullets hitting the top of the enemy, but this cannot not happen anyway)
+
+					canvas.delete(bullet)
+					enemystats["health"] -= 1 * ship_stats["damagemultiplier"] #Damage calculation, implement variable base damage in the future
+
+					if enemystats["health"] <= 0:
+
+						canvas.delete(enemyitem)
+						enemylist.remove(enemy)
+
+
+
+
+
+		#Level
+		if gametime == 0:
+			enemylist.append(enemy_spawn(1, 450, 300, "forward"))
+
+
+		#Autosave
+		savestate.write(str(gametime) + ", " + str(enemylist) + "\n")
 		for item in canvas.find_withtag("game"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
 
 			savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
+
 
 		#Pausing
 		if pausestate == True:
@@ -326,6 +389,7 @@ def game_start(difficulty, ship, state="new"):
 				pausestate = False
 
 		else:
+			gametime += 1
 			window.after(16, game_loop)
 
 	game_loop()
@@ -355,6 +419,8 @@ ship_image = PhotoImage(file="Assets/aship1.png")
 playerlaserstraight_image = PhotoImage(file="Assets/playerlaserstraight.png")
 playerlaserround_image = PhotoImage(file="Assets/playerlaserround.png")
 
+#Enemies
+enemy1_image = PhotoImage(file="Assets/enemy1.png")
 menu()
 
 window.mainloop()

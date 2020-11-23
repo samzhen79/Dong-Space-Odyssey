@@ -1,1 +1,2 @@
-[820.0, 120.0]~{'activeimage': ('activeimage', '', '', '', ''), 'anchor': ('anchor', '', '', 'center', 'n'), 'disabledimage': ('disabledimage', '', '', '', ''), 'image': ('image', '', '', '', 'pyimage6'), 'state': ('state', '', '', '', 'normal'), 'tags': ('tags', '', '', '', 'fg game ship shipbody')}
+156, []
+[500.0, 620.0]~{'activeimage': ('activeimage', '', '', '', ''), 'anchor': ('anchor', '', '', 'center', 'n'), 'disabledimage': ('disabledimage', '', '', '', ''), 'image': ('image', '', '', '', 'pyimage6'), 'state': ('state', '', '', '', 'normal'), 'tags': ('tags', '', '', '', 'fg game ship shipbody')}
