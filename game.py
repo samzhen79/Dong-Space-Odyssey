@@ -134,9 +134,9 @@ def game_start(difficulty, ship, state="new"):
 
 	canvas.delete("fg")
 
-	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, ship_stats
+	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, ship_stats, attackinterval
 	maxvelocity = 10
-	velx, vely, gametime = 0, 0, 0
+	velx, vely, gametime, attackinterval = 0, 0, 0, 0
 	shoot, interval, pausestate = False, False, False
 
 	if state == "new": # New Game
@@ -204,12 +204,15 @@ def game_start(difficulty, ship, state="new"):
 					tagstring += '"' + str(tag) +'", '
 
 				tagstring = tagstring[0:-2]
+
 				#creates the needed objects from the interpreted savestate.txt
 				canvas.create_image(coords[0], coords[1], anchor = anchor, image = image, tags = (eval(tagstring)))
 
 			i = 0
 
+			#Due to having to recreate all the canvas items, the item handle written in enemylist is now incorrect and must be updated with the new handle.
 			for enemy in canvas.find_withtag("enemy"):
+
 				enemylist[i][0]=enemy
 				i+1
 
@@ -243,6 +246,7 @@ def game_start(difficulty, ship, state="new"):
 		#Pause
 		if event.keysym.upper() == settings["CONTROLS"]["Pause"].upper():
 			pausestate = True
+
 	def key_release(event):
 		"""Records when a key is released for movement and shooting"""
 		global maxvelocity, velx, vely, shoot
@@ -289,7 +293,7 @@ def game_start(difficulty, ship, state="new"):
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist
+		global x, y, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, attackinterval
 
 		savestate.seek(0)
 		savestate.truncate(0)
@@ -324,10 +328,13 @@ def game_start(difficulty, ship, state="new"):
 		# Player Shooting
 		if shoot == True:
 
-			canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
-			canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
+			attackinterval +=1
 
-			interval = not(interval)
+			if not(attackinterval % 5): #30 indicates fire rate
+
+				canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
+				canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
+
 
 			#For creating round bullets on higher ship levels
 			# if interval == True:
@@ -358,18 +365,23 @@ def game_start(difficulty, ship, state="new"):
 				if (bulletbbox[1] <= enemybbox[3]) and (bulletbbox[2] >= enemybbox[0]) and (bulletbbox[0] <= enemybbox[2]): #If the bullet is within the bounds of the enemy ship (Does not account for bullets hitting the top of the enemy, but this cannot not happen anyway)
 
 					canvas.delete(bullet)
-					enemystats["health"] -= 1 * ship_stats["damagemultiplier"] #Damage calculation, implement variable base damage in the future
+					enemystats["health"] -= 3 * ship_stats["damagemultiplier"] #Damage calculation, implement variable base damage in the future
 
-					if enemystats["health"] <= 0:
+					if enemystats["health"] <=0:
 
-						canvas.delete(enemyitem)
-						enemylist.remove(enemy)
+						print(enemy)
+						print(enemylist)
+
+						try:
+							canvas.delete(enemyitem)
+							enemylist.remove(enemy)
+
+						except ValueError:
+
+							pass
 
 
-
-
-
-		#Level
+		#Stages
 		if gametime == 0:
 			enemylist.append(enemy_spawn(1, 450, 300, "forward"))
 
