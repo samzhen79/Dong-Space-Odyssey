@@ -1,4 +1,4 @@
-from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, messagebox, CENTER, N, NE, NW, SW, BOTH
+from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, messagebox, ttk, CENTER, N, NE, NW, S, SW, BOTH
 from configparser import ConfigParser
 import time, json, math
 
@@ -138,14 +138,11 @@ def game_start(difficulty, ship, state="new"):
 	velx, vely, gametime, attackinterval, score = 0, 0, 0, 0, 0
 	shoot, interval, pausestate = False, False, False
 
-	score_label = Label(window, text="Score: " + str(score).zfill(10), font = ("Impact", 18))
 
-	score_canvaswindow = canvas.create_window(900, 0, anchor=NE, window=score_label, tags=("fg", "game"))
-
-
+	#Start New or Saved Game
 	if state == "new": # New Game
 
-		canvas.create_image(450.0,1080.0, anchor = N, image = ship_image, tags=("fg", "game", "ship", "shipbody"))
+		canvas.create_image(450.0,1080.0, anchor = N, image = ship_image, tags=("fg", "game", "ship", "shipbody","gameimage"))
 
 		ship_stats = {
 			"type": 1,
@@ -225,10 +222,20 @@ def game_start(difficulty, ship, state="new"):
 			savestate = open("savestate.txt", "w")
 
 
+	#UI Elements
+
+
+	score_label = Label(window, text="Score: " + str(score).zfill(10), font = ("Impact", 18))
+
+	canvas.create_window(900, 0, anchor=NE, window=score_label, tags=("fg", "game"))
+	healthbarbg = canvas.create_line(0, 1070, 900, 1070, fill="red", width=10, tags=("fg", "game"))
+	healthbarfg = canvas.create_line(0, 1070, 900, 1070, fill="green", width=10, tags=("fg", "game"))
+
+
+	#Player Movement and shooting
 	settings = ConfigParser()
 	settings.read("settings.ini")
 
-	#Player Movement and shooting
 	def key_press(event):
 		"""Records key presses for controls"""
 		global velx, vely, shoot, pausestate
@@ -274,18 +281,21 @@ def game_start(difficulty, ship, state="new"):
 	canvas.bind_all("<KeyPress>", key_press)
 	canvas.bind_all("<KeyRelease>", key_release)
 
+	#Enemy
 	def enemy_spawn(type, spawnx, spawny, movement):
 		"""Spawn an enemy entity"""
 		if type == 1:
-			enemy = canvas.create_image(spawnx, spawny, image = enemy1_image, tag=("fg","enemy","game"))
+			enemy = canvas.create_image(spawnx, spawny, image = enemy1_image, tag=("fg","enemy","game","gameimage"))
 			enemystats = {
 				"type": 1,
 				"health" : 50,
 				"movement" : movement,
+				"damage" : 10,
 				"points" : 100
 			}
 			return enemy, enemystats
 
+	#Game Saving
 	def saveonclose():
 		"""Saves the game state on window close"""
 		savestate.close()
@@ -296,10 +306,11 @@ def game_start(difficulty, ship, state="new"):
 		savestate.close()
 		menu()
 
+	#The Actual Game
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, attackinterval, score
+		global x, y, velx, vely, shoot, interval, pausestate, savestate, gametime, ship_stats, enemylist, attackinterval, score
 
 		savestate.seek(0)
 		savestate.truncate(0)
@@ -310,6 +321,7 @@ def game_start(difficulty, ship, state="new"):
 		window.protocol("WM_DELETE_WINDOW", saveonclose)
 
 		score_label.config(text="Score: " + str(score).zfill(10))
+		canvas.coords(healthbarfg, 0, 1070, 900*(ship_stats["health"]/100), 1070) #Assuming max health is 100
 
 		#Player Movement
 		x, y = 0, 0
@@ -340,8 +352,8 @@ def game_start(difficulty, ship, state="new"):
 
 			if not(attackinterval % 10): # % x indicates fire rate
 
-				canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
-				canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
+				canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game","gameimage"))
+				canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game","gameimage"))
 
 			attackinterval += 1
 
@@ -363,9 +375,6 @@ def game_start(difficulty, ship, state="new"):
 				canvas.delete(bullet)
 
 
-		#Enemy Movement
-
-
 		#Collisions and Damage
 		for enemy in enemylist:
 
@@ -373,6 +382,9 @@ def game_start(difficulty, ship, state="new"):
 			enemyitem = enemy[0]
 			enemybbox = canvas.bbox(enemyitem)
 
+
+
+			#Collisions and Damage
 			for bullet in canvas.find_withtag("playerbullet"):
 
 				bulletbbox = canvas.bbox(bullet)
@@ -401,7 +413,7 @@ def game_start(difficulty, ship, state="new"):
 
 		#Autosave
 		savestate.write(str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "~" + str(score) + "\n")
-		for item in canvas.find_withtag("game"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
+		for item in canvas.find_withtag("gameimage"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
 
 			savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
 
