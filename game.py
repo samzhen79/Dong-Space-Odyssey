@@ -1,7 +1,6 @@
 from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, messagebox, CENTER, N, NW, SW, BOTH
-import time
 from configparser import ConfigParser
-import json
+import time, json, math
 
 def menu(menutype="default"):
 	"""Creates a menu, takes arguments so that different menus can be chosen"""
@@ -135,7 +134,7 @@ def game_start(difficulty, ship, state="new"):
 	canvas.delete("fg")
 
 	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, ship_stats, attackinterval
-	maxvelocity = 10
+	maxvelocity = 8
 	velx, vely, gametime, attackinterval = 0, 0, 0, 0
 	shoot, interval, pausestate = False, False, False
 
@@ -322,25 +321,33 @@ def game_start(difficulty, ship, state="new"):
 		if y1 >= 1100:
 			y = -maxvelocity
 
-		canvas.move("ship", x, y)
+		if x != 0 and y != 0:	#Normalise diagonal movement 
+			x = x*(math.sqrt(2)/2)
+			y = y*(math.sqrt(2)/2)
 
+		canvas.move("ship", x, y)
 
 		# Player Shooting
 		if shoot == True:
 
-			attackinterval +=1
-
-			if not(attackinterval % 5): #30 indicates fire rate
+			if not(attackinterval % 10): # % x indicates fire rate
 
 				canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
 				canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game"))
 
+			attackinterval += 1
+
+		else:	# Can think of this as keeping a round in the chamber
+
+			if (attackinterval % 10) != 0: # Fire rate number
+
+				attackinterval += 1
 
 			#For creating round bullets on higher ship levels
 			# if interval == True:
 			# 	canvas.create_image(x1,y1, image = playerlaserround_image, tag = ("fg","playerbullet","round"))
 	
-		canvas.move("straight", 0 , -100)
+		canvas.move("straight", 0 , -30)
 		# canvas.move("round", 0 , -150)
 
 		for bullet in canvas.find_withtag("bullet"): # Clears bullets that exit the canvas
@@ -369,14 +376,11 @@ def game_start(difficulty, ship, state="new"):
 
 					if enemystats["health"] <=0:
 
-						print(enemy)
-						print(enemylist)
-
 						try:
 							canvas.delete(enemyitem)
 							enemylist.remove(enemy)
 
-						except ValueError:
+						except ValueError:	#Catches the exception when two bullets both collide with an enemy and program tries to remove the enemy twice
 
 							pass
 
@@ -408,7 +412,7 @@ def game_start(difficulty, ship, state="new"):
 
 		else:
 			gametime += 1
-			window.after(16, game_loop)
+			window.after(16, game_loop) 
 
 	game_loop()
 
