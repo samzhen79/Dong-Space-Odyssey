@@ -381,11 +381,11 @@ def game_start(difficulty, ship, state="new"):
 
 				if not(gametime % 80):
 
-					canvas.create_image(enemybbox[0]+15, enemybbox[3], anchor=N, image=enemylaserstraight_image, tag=("fg","bullet","enemybulletstraight","game","gameimage"))
-					canvas.create_image(enemybbox[2]-15, enemybbox[3], anchor=N, image=enemylaserstraight_image, tag=("fg","bullet","enemybulletstraight","game","gameimage"))
+					canvas.create_image(enemybbox[0]+15, enemybbox[3], anchor=N, image=enemylaserstraight_image, tag=("fg","bullet","enemybullet","enemybulletstraight","game","gameimage"))
+					canvas.create_image(enemybbox[2]-15, enemybbox[3], anchor=N, image=enemylaserstraight_image, tag=("fg","bullet","enemybullet","enemybulletstraight","game","gameimage"))
 
 
-			#Collisions and Damage (playerbullet against enemyship)
+			# Enemy Collisions and Damage
 			for bullet in canvas.find_withtag("playerbullet"):
 
 				bulletbbox = canvas.bbox(bullet)
@@ -407,6 +407,24 @@ def game_start(difficulty, ship, state="new"):
 							pass
 
 			canvas.move("enemybulletstraight", 0, 15)
+
+
+		#Player Collision and Damage
+		for bullet in canvas.find_withtag("enemybullet"):
+
+			bulletbbox = canvas.bbox(bullet)
+
+			if (bulletbbox[3] >= y0) and (bulletbbox[0] >= x0) and (bulletbbox[2] <= x1): #If the bullet is within the bounds of the enemy ship (Does not account for bullets hitting the top of the enemy, but this cannot not happen anyway)
+
+				canvas.delete(bullet)
+				ship_stats["health"] -= 10 #Damage calculation, implement variable base damage in the future
+				canvas.coords(healthbarfg, 0, 1070, 900*(ship_stats["health"]/100), 1070)
+
+				if ship_stats["health"] <=0:
+					return
+
+
+
 
 
 		#Stages
