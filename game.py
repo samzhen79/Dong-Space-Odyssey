@@ -1,4 +1,4 @@
-from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, messagebox, CENTER, N, NW, SW, BOTH
+from tkinter import Tk, PhotoImage, Label, Button, Canvas, Frame, messagebox, CENTER, N, NE, NW, SW, BOTH
 from configparser import ConfigParser
 import time, json, math
 
@@ -133,10 +133,15 @@ def game_start(difficulty, ship, state="new"):
 
 	canvas.delete("fg")
 
-	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, ship_stats, attackinterval
+	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, ship_stats, attackinterval, score
 	maxvelocity = 8
-	velx, vely, gametime, attackinterval = 0, 0, 0, 0
+	velx, vely, gametime, attackinterval, score = 0, 0, 0, 0, 0
 	shoot, interval, pausestate = False, False, False
+
+	score_label = Label(window, text="Score: " + str(score).zfill(10), font = ("Impact", 18))
+
+	score_canvaswindow = canvas.create_window(900, 0, anchor=NE, window=score_label, tags=("fg", "game"))
+
 
 	if state == "new": # New Game
 
@@ -179,6 +184,7 @@ def game_start(difficulty, ship, state="new"):
 			gametime = int(information[0])
 			ship_stats = json.loads(information[1])
 			enemylist = json.loads(information[2])
+			score = int(information[3])
 
 			for object in savestateobjects[1:]:
 				#This code is needed to interpret the savestate.txt, Effectively splits the text file into the necessary parts and then cleans each part until it is useable in create_image()
@@ -275,7 +281,8 @@ def game_start(difficulty, ship, state="new"):
 			enemystats = {
 				"type": 1,
 				"health" : 50,
-				"movement" : movement
+				"movement" : movement,
+				"points" : 100
 			}
 			return enemy, enemystats
 
@@ -292,7 +299,7 @@ def game_start(difficulty, ship, state="new"):
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, attackinterval
+		global x, y, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, attackinterval, score
 
 		savestate.seek(0)
 		savestate.truncate(0)
@@ -302,6 +309,7 @@ def game_start(difficulty, ship, state="new"):
 
 		window.protocol("WM_DELETE_WINDOW", saveonclose)
 
+		score_label.config(text="Score: " + str(score).zfill(10))
 
 		#Player Movement
 		x, y = 0, 0
@@ -379,6 +387,7 @@ def game_start(difficulty, ship, state="new"):
 						try:
 							canvas.delete(enemyitem)
 							enemylist.remove(enemy)
+							score += enemystats["points"]
 
 						except ValueError:	#Catches the exception when two bullets both collide with an enemy and program tries to remove the enemy twice
 
@@ -391,7 +400,7 @@ def game_start(difficulty, ship, state="new"):
 
 
 		#Autosave
-		savestate.write(str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "\n")
+		savestate.write(str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "~" + str(score) + "\n")
 		for item in canvas.find_withtag("game"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
 
 			savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
