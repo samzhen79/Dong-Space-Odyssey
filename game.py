@@ -133,10 +133,10 @@ def game_start(difficulty, ship, state="new"):
 
 	canvas.delete("fg")
 
-	global maxvelocity, velx, vely, shoot, interval, pausestate, savestate, gametime, enemylist, ship_stats, attackinterval, score
+	global maxvelocity, velx, vely, shoot, pausestate, savestate, gametime, enemylist, ship_stats, attackinterval, score
 	maxvelocity = 8
 	velx, vely, gametime, attackinterval, score = 0, 0, 0, 0, 0
-	shoot, interval, pausestate = False, False, False
+	shoot, pausestate = False, False
 
 
 	#Start New or Saved Game
@@ -223,8 +223,6 @@ def game_start(difficulty, ship, state="new"):
 
 
 	#UI Elements
-
-
 	score_label = Label(window, text="Score: " + str(score).zfill(10), font = ("Impact", 18))
 
 	canvas.create_window(900, 0, anchor=NE, window=score_label, tags=("fg", "game"))
@@ -310,7 +308,7 @@ def game_start(difficulty, ship, state="new"):
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely, shoot, interval, pausestate, savestate, gametime, ship_stats, enemylist, attackinterval, score
+		global x, y, velx, vely, shoot, pausestate, savestate, gametime, ship_stats, enemylist, attackinterval, score
 
 		savestate.seek(0)
 		savestate.truncate(0)
@@ -352,8 +350,8 @@ def game_start(difficulty, ship, state="new"):
 
 			if not(attackinterval % 10): # % x indicates fire rate
 
-				canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game","gameimage"))
-				canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","straight","game","gameimage"))
+				canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","game","gameimage"))
+				canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","game","gameimage"))
 
 			attackinterval += 1
 
@@ -364,27 +362,30 @@ def game_start(difficulty, ship, state="new"):
 				attackinterval += 1
 
 			#For creating round bullets on higher ship levels
-			# if interval == True:
-			# 	canvas.create_image(x1,y1, image = playerlaserround_image, tag = ("fg","playerbullet","round"))
+			# 	canvas.create_image(x1,y1, image = playerlaserround_image, tag = ("fg","playerbullet"))
 	
-		canvas.move("straight", 0 , -30)
+		canvas.move("playerbullet", 0 , -30)
 		# canvas.move("round", 0 , -150)
 
-		for bullet in canvas.find_withtag("bullet"): # Clears bullets that exit the canvas
-			if canvas.coords(bullet)[1] <= -100:
-				canvas.delete(bullet)
 
 
-		#Collisions and Damage
+		#Enemy
 		for enemy in enemylist:
 
 			enemystats = enemy[1]
 			enemyitem = enemy[0]
 			enemybbox = canvas.bbox(enemyitem)
 
+			#Shooting
+			if enemystats["type"] == 1:
+
+				if not(gametime % 80):
+
+					canvas.create_image(enemybbox[0]+15, enemybbox[3], anchor=N, image=enemylaserstraight_image, tag=("fg","bullet","enemybulletstraight","game","gameimage"))
+					canvas.create_image(enemybbox[2]-15, enemybbox[3], anchor=N, image=enemylaserstraight_image, tag=("fg","bullet","enemybulletstraight","game","gameimage"))
 
 
-			#Collisions and Damage
+			#Collisions and Damage (playerbullet against enemyship)
 			for bullet in canvas.find_withtag("playerbullet"):
 
 				bulletbbox = canvas.bbox(bullet)
@@ -405,6 +406,8 @@ def game_start(difficulty, ship, state="new"):
 
 							pass
 
+			canvas.move("enemybulletstraight", 0, 15)
+
 
 		#Stages
 		if gametime == 0:
@@ -417,6 +420,10 @@ def game_start(difficulty, ship, state="new"):
 
 			savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
 
+		#Cleaning
+		for bullet in canvas.find_withtag("bullet"): # Clears bullets that exit the canvas
+			if canvas.coords(bullet)[1] <= -100:
+				canvas.delete(bullet)
 
 		#Pausing
 		if pausestate == True:
@@ -464,6 +471,7 @@ playerlaserround_image = PhotoImage(file="Assets/playerlaserround.png")
 
 #Enemies
 enemy1_image = PhotoImage(file="Assets/enemy1.png")
-menu()
+enemylaserstraight_image = PhotoImage(file="Assets/enemylaserstraight.png")
 
+menu()
 window.mainloop()
