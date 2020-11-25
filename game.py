@@ -142,7 +142,8 @@ def game_start(difficulty, ship, state="new"):
 	#Start New or Saved Game
 	if state == "new": # New Game
 
-		canvas.create_image(450.0,1080.0, anchor = N, image = ship_image, tags=("fg", "game", "ship", "shipbody","gameimage"))
+		hitbox = canvas.create_oval(450-11,1080+116,450+12,1080+116+27, tags=("fg", "ship"))
+		canvas.create_image(450, 1080, anchor = N, image = ship_image, tags=("fg", "game", "ship", "shipbody","gameimage"))	
 
 		ship_stats = {
 			"type": 1,
@@ -157,7 +158,7 @@ def game_start(difficulty, ship, state="new"):
 		# Neat little for loop here to have the ship enter the scene with a simple animation
 		for x in range(40):
 			time.sleep(0.01)
-			canvas.move(ship, 0, -10)
+			canvas.move("ship", 0, -10)
 			window.update()
 
 		savestate = open("savestate.txt", "w")
@@ -390,7 +391,7 @@ def game_start(difficulty, ship, state="new"):
 
 				bulletbbox = canvas.bbox(bullet)
 
-				if (bulletbbox[1] <= enemybbox[3]) and (bulletbbox[2] >= enemybbox[0]) and (bulletbbox[0] <= enemybbox[2]): #If the bullet is within the bounds of the enemy ship (Does not account for bullets hitting the top of the enemy, but this cannot not happen anyway)
+				if (bulletbbox[3] >= enemybbox[1]) and (bulletbbox[1] <= enemybbox[3]) and (bulletbbox[2] >= enemybbox[0]) and (bulletbbox[0] <= enemybbox[2]): #If the bullet is within the bounds of the enemy ship
 
 					canvas.delete(bullet)
 					enemystats["health"] -= 3 * ship_stats["damagemultiplier"] #Damage calculation, implement variable base damage in the future
@@ -406,18 +407,19 @@ def game_start(difficulty, ship, state="new"):
 
 							pass
 
-			canvas.move("enemybulletstraight", 0, 15)
+		canvas.move("enemybulletstraight", 0, 15)
 
 
 		#Player Collision and Damage
 		for bullet in canvas.find_withtag("enemybullet"):
 
 			bulletbbox = canvas.bbox(bullet)
+			hitboxbbox = canvas.bbox(hitbox)
 
-			if (bulletbbox[3] >= y0) and (bulletbbox[0] >= x0) and (bulletbbox[2] <= x1): #If the bullet is within the bounds of the enemy ship (Does not account for bullets hitting the top of the enemy, but this cannot not happen anyway)
+			if (bulletbbox[3] >= hitboxbbox[1]) and (bulletbbox[1] <= hitboxbbox[3]) and (bulletbbox[2] >= hitboxbbox[0]) and (bulletbbox[0] <= hitboxbbox[2]): 
 
 				canvas.delete(bullet)
-				ship_stats["health"] -= 10 #Damage calculation, implement variable base damage in the future
+				ship_stats["health"] -= 1 #Damage calculation, implement variable base damage in the future
 				canvas.coords(healthbarfg, 0, 1070, 900*(ship_stats["health"]/100), 1070)
 
 				if ship_stats["health"] <=0:
