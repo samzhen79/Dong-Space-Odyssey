@@ -10,7 +10,7 @@ def menu(menutype="default"):
 	settings = ConfigParser()
 	settings.read("settings.ini")
 
-	back_button = Button(window, text="Back", font = ("Arial", 50), command=menu)
+	back_button = Button(window, text="Back", font = ("Impact", 50), command=menu)
 
 	if menutype == "play":
 
@@ -27,7 +27,7 @@ def menu(menutype="default"):
 
 		ship = canvas.create_image(450,540,image = ship_image, tags="fg")
 
-		choose_button = Button(window, text="Choose", font = ("Arial", 50),  command=lambda menutype="difficulty": menu(menutype))
+		choose_button = Button(window, text="Choose", font = ("Impact", 50),  command=lambda menutype="difficulty": menu(menutype))
 		canvas.create_window(450,800, anchor=CENTER, window=choose_button, tags="fg")
 
 		back_button.config(command = lambda menutype="play": menu(menutype))
@@ -36,9 +36,9 @@ def menu(menutype="default"):
 
 	elif menutype == "difficulty":
 
-		easy_button = Button(window, text="Easy", font = ("Arial", 50), command = lambda difficulty = "easy", ship = "ship": game_start(difficulty, ship))
-		normal_button = Button(window, text="Normal", font = ("Arial", 50), command = lambda difficulty = "normal", ship = "ship": game_start(difficulty, ship))
-		hard_button = Button(window, text="Hard", font = ("Arial", 50), command = lambda difficulty = "hard", ship = "ship": game_start(difficulty, ship))
+		easy_button = Button(window, text="Easy", font = ("Impact", 50), command = lambda difficulty = "easy", ship = "ship": game_start(difficulty, ship))
+		normal_button = Button(window, text="Normal", font = ("Impact", 50), command = lambda difficulty = "normal", ship = "ship": game_start(difficulty, ship))
+		hard_button = Button(window, text="Hard", font = ("Impact", 50), command = lambda difficulty = "hard", ship = "ship": game_start(difficulty, ship))
 
 		canvas.create_window(450, 350, anchor=CENTER, window=easy_button, tags="fg")
 		canvas.create_window(450, 550, anchor=CENTER, window=normal_button, tags="fg")
@@ -90,10 +90,10 @@ def menu(menutype="default"):
 	else: # This is the default menutype i.e. the main menu
 
 		title_label = Label(window, image=title_image)
-		play_button = Button(window, text="Play", font = ("Arial", 50), command= lambda menutype="play": menu(menutype))
-		settings_button = Button(window, text="Settings", font = ("Arial", 50), command= lambda menutype="settings": menu(menutype))
-		about_button = Button(window, text="About", font = ("Arial", 50), command= lambda menutype="about": menu(menutype))
-		exit_button = Button(window, text="Exit", font = ("Arial", 50), command= lambda: window.destroy())
+		play_button = Button(window, text="Play", font = ("Impact", 50), command= lambda menutype="play": menu(menutype))
+		settings_button = Button(window, text="Settings", font = ("Impact", 50), command= lambda menutype="settings": menu(menutype))
+		about_button = Button(window, text="About", font = ("Impact", 50), command= lambda menutype="about": menu(menutype))
+		exit_button = Button(window, text="Exit", font = ("Impact", 50), command= lambda: window.destroy())
 
 		canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
 		canvas.create_window(450,350, anchor=CENTER, window=play_button, tags="fg")
@@ -123,7 +123,7 @@ def changekey(control, button):
 
 		window.unbind("<Key>")
 
-	keyprompt_label = Label(window, text="Press a key...", font = ("Arial", 30), width=500, height=600)
+	keyprompt_label = Label(window, text="Press a key...", font = ("Impact", 30), width=500, height=600)
 	keyprompt_canvaswindow = canvas.create_window(450, 540, anchor=CENTER, window=keyprompt_label, tags="fg")
 
 	window.bind("<Key>", change)
