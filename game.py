@@ -211,6 +211,9 @@ def game_start(difficulty, ship, state="new"):
 				#creates the needed objects from the interpreted savestate.txt
 				canvas.create_image(coords[0], coords[1], anchor = anchor, image = image, tags = (eval(tagstring)))
 
+			shipx, shipy = canvas.coords("ship")
+			hitbox = canvas.create_oval(shipx-11,shipy+116,shipx+12,shipy+116+27, tags=("fg", "ship"))
+
 			i = 0
 
 			#Due to having to recreate all the canvas items, the item handle written in enemylist is now incorrect and must be updated with the new handle.
@@ -289,6 +292,7 @@ def game_start(difficulty, ship, state="new"):
 				"type": 1,
 				"health" : 50,
 				"movement" : movement,
+				"speed" : 2,
 				"damage" : 10,
 				"points" : 100
 			}
@@ -351,12 +355,12 @@ def game_start(difficulty, ship, state="new"):
 
 			if not(attackinterval % 10): # % x indicates fire rate
 
-				canvas.create_image(x0+85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","game","gameimage"))
-				canvas.create_image(x1-85,y0+200, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","game","gameimage"))
+				canvas.create_image(x0+90,y0+180, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","game","gameimage"))
+				canvas.create_image(x1-90,y0+180, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","game","gameimage"))
 
 			attackinterval += 1
 
-		else:	# Can think of this as keeping a round in the chamber
+		else:	# Can think of this as preloading a shot
 
 			if (attackinterval % 10) != 0: # Fire rate number
 
@@ -377,6 +381,10 @@ def game_start(difficulty, ship, state="new"):
 			enemyitem = enemy[0]
 			enemybbox = canvas.bbox(enemyitem)
 
+			#Movement
+			if enemystats["movement"] == "forward":
+				canvas.move(enemyitem, 0, enemystats["speed"])
+
 			#Shooting
 			if enemystats["type"] == 1:
 
@@ -394,7 +402,7 @@ def game_start(difficulty, ship, state="new"):
 				if (bulletbbox[3] >= enemybbox[1]) and (bulletbbox[1] <= enemybbox[3]) and (bulletbbox[2] >= enemybbox[0]) and (bulletbbox[0] <= enemybbox[2]): #If the bullet is within the bounds of the enemy ship
 
 					canvas.delete(bullet)
-					enemystats["health"] -= 3 * ship_stats["damagemultiplier"] #Damage calculation, implement variable base damage in the future
+					enemystats["health"] -= 10 * ship_stats["damagemultiplier"] #Damage calculation, implement variable base damage in the future
 
 					if enemystats["health"] <=0:
 
@@ -431,7 +439,7 @@ def game_start(difficulty, ship, state="new"):
 
 		#Stages
 		if gametime == 0:
-			enemylist.append(enemy_spawn(1, 450, 300, "forward"))
+			enemylist.append(enemy_spawn(1, 450, 0, "forward"))
 
 
 		#Autosave
