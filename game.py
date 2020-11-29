@@ -5,7 +5,7 @@ import time, json, math
 def menu(menutype="default"):
 	"""Creates a menu, takes arguments so that different menus can be chosen"""
 
-	canvas.delete("fg") #fg for foreground of course, removes all foreground canvas items
+	canvas.delete("fg") #Removes all foreground canvas items
 
 	settings = ConfigParser()
 	settings.read("settings.ini")
@@ -104,7 +104,7 @@ def menu(menutype="default"):
 def changekey(control, button):
 	"""Starts the control key change process, takes the specific control being changed and the value of the button that was pressed"""
 	def change(key):
-		"""Changes the key in the settings.ini file to a key the user presses"""
+		"""Changes the key in the settings.ini file to hte key the user pressed"""
 
 		global controls
 		canvas.delete(keyprompt_canvaswindow) 
@@ -142,7 +142,7 @@ def game_start(difficulty, ship, state="new"):
 	#Start New or Saved Game
 	if state == "new": # New Game
 
-		hitbox = canvas.create_oval(450-11,1080+116,450+12,1080+116+27, tags=("fg", "ship"))
+		hitbox = canvas.create_oval(450-11,1080+116,450+12,1080+116+27, tags=("fg", "ship","game"))
 		canvas.create_image(450, 1080, anchor = N, image = ship_image, tags=("fg", "game", "ship", "shipbody","gameimage"))	
 
 		ship_stats = {
@@ -154,6 +154,8 @@ def game_start(difficulty, ship, state="new"):
 		}
 
 		enemylist = []
+		specialenemybulletlist = []
+		enemybulletspreadlist = []
 
 		# Neat little for loop here to have the ship enter the scene with a simple animation
 		for x in range(40):
@@ -177,12 +179,13 @@ def game_start(difficulty, ship, state="new"):
 		else:
 
 			savestateobjects = file.read().splitlines()
-
 			information = savestateobjects[0].split("~")
 			gametime = int(information[0])
 			ship_stats = json.loads(information[1])
 			enemylist = json.loads(information[2])
-			score = int(information[3])
+			specialenemybulletlist = json.loads(information[3])
+			enemybulletspreadlist = json.loads(information[4])
+			score = int(information[5])
 
 			for object in savestateobjects[1:]:
 				#This code is needed to interpret the savestate.txt, Effectively splits the text file into the necessary parts and then cleans each part until it is useable in create_image()
@@ -212,15 +215,27 @@ def game_start(difficulty, ship, state="new"):
 				canvas.create_image(coords[0], coords[1], anchor = anchor, image = image, tags = (eval(tagstring)))
 
 			shipx, shipy = canvas.coords("ship")
-			hitbox = canvas.create_oval(shipx-11,shipy+116,shipx+12,shipy+116+27, tags=("fg", "ship"))
-
-			i = 0
+			hitbox = canvas.create_oval(shipx-11,shipy+116,shipx+12,shipy+116+27, tags=("fg", "ship","game"))
 
 			#Due to having to recreate all the canvas items, the item handle written in enemylist is now incorrect and must be updated with the new handle.
+			i = 0
 			for enemy in canvas.find_withtag("enemy"):
 
-				enemylist[i][0]=enemy
-				i+1
+				enemylist[i][0] = enemy
+				i += 1
+
+			#Same for the tracking bullets and spread bullets too
+			i = 0
+			for bullet in canvas.find_withtag("enemybullettrack"):
+
+				specialenemybulletlist[i][0] = bullet
+				i += 1
+
+			i = 0
+			for bullet in canvas.find_withtag("enemybulletspread"):
+
+				enemybulletspreadlist[i][0] = bullet
+				i += 1
 
 			file.close()
 			savestate = open("savestate.txt", "w")
@@ -283,20 +298,121 @@ def game_start(difficulty, ship, state="new"):
 	canvas.bind_all("<KeyPress>", key_press)
 	canvas.bind_all("<KeyRelease>", key_release)
 
-	#Enemy
-	def enemy_spawn(type, spawnx, spawny, movement):
-		"""Spawn an enemy entity"""
-		if type == 1:
+	#Enemy spawn
+	def enemy_spawn(type, spawnx, spawny, movement, stopx = 0, stopy = 0):
+		"""Spawn an enemy entity, different available types of enemy"""
+
+		if type == 1: #Regular enemy type, shoots two simple lasers
 			enemy = canvas.create_image(spawnx, spawny, image = enemy1_image, tag=("fg","enemy","game","gameimage"))
 			enemystats = {
 				"type": 1,
-				"health" : 50,
+				"health" : 100,
 				"movement" : movement,
+				"stopx" : stopx,
+				"stopy" : stopy,
+				"speed" : 3,
+				"damage" : 10,
+				"points" : 1000
+			}
+
+		elif type == 2: #Similar to type 1, but only moves horizontally and follows the player
+			enemy = canvas.create_image(spawnx, spawny, image = enemy2_image, tag=("fg","enemy","game","gameimage"))
+			enemystats = {
+				"type": 2,
+				"health" : 50,
+				"movement" : "followx",
+				"stopx" : stopx,
+				"stopy" : stopy,
+				"speed" : 4,
+				"damage" : 10,
+				"points" : 1000
+			}
+
+		elif type == 3: #Shoots a 3 shot burst
+			enemy = canvas.create_image(spawnx, spawny, image = enemy3_image, tag=("fg","enemy","game","gameimage"))
+			enemystats = {
+				"type": 3,
+				"health" : 150,
+				"movement" : movement,
+				"stopx" : stopx,
+				"stopy" : stopy,
+				"speed" : 3,
+				"damage" : 10,
+				"points" : 1500
+			}
+
+		elif type == 4:	#Slow moving also only moves horizontally, shoots a high damage tracking bullet
+			enemy = canvas.create_image(spawnx, spawny, image = enemy4_image, tag=("fg","enemy","game","gameimage"))
+			enemystats = {
+				"type": 4,
+				"health" : 100,
+				"movement" : movement,
+				"stopx" : stopx,
+				"stopy" : stopy,
+				"speed" : 1,
+				"damage" : 20,
+				"points" : 1500
+			}
+
+		elif type == 5: #Elite type, shoots a single round bullet (cross) that itself shoots out a bunch of round bullets
+			enemy = canvas.create_image(spawnx, spawny, image = enemy5_image, tag=("fg","enemy","game","gameimage"))
+			enemystats = {
+				"type": 5,
+				"health" : 350,
+				"movement" : movement,
+				"stopx" : stopx,
+				"stopy" : stopy,
+				"speed" : 1,
+				"damage" : 10,
+				"points" : 2500
+			}
+
+		elif type == "boss": #Pretty self explanatory
+			enemy = canvas.create_image(spawnx, spawny, image = boss1_image, tag=("fg","enemy","game","gameimage"))
+			enemystats = {
+				"type": "boss",
+				"health" : 5000,
+				"movement" : movement,
+				"stopx" : stopx,
+				"stopy" : stopy,
 				"speed" : 2,
 				"damage" : 10,
-				"points" : 100
+				"points" : 100000
 			}
-			return enemy, enemystats
+
+		return enemy, enemystats
+
+	def enemybullet(type, x, y, shipx=0, shipy=0):
+		"""Spawn an enemy bullet, different types of bullets available"""
+
+		if type == "simple": #Straight laser
+
+			canvas.create_image(x, y, anchor=N, image=enemylaserstraight_image, tag=("fg","enemybullet","enemybulletstraight","game","gameimage"))
+
+		elif type == "track": #Round laser that is pointed towards given player position
+
+			bullet = canvas.create_image(x, y, anchor=N, image=enemylaserround_image, tag=("fg","enemybullet","enemybullettrack","game","gameimage"))
+
+			#Maths to work out which direction the bullet needs to move in to move towards the player position
+			bulletbbox = canvas.bbox(bullet)
+			bulletx = (bulletbbox[0]+bulletbbox[2])/2
+			bullety = (bulletbbox[1]+bulletbbox[3])/2
+			directDist = math.sqrt(((shipx-bulletx) ** 2) + ((shipy-bullety) ** 2))
+			movex = (shipx-bulletx) / directDist
+			movey = (shipy-bullety) / directDist
+			movementcoords = [movex*10, movey*10]
+
+			#Need to keep track of which bullet is moving in what direction
+			specialenemybulletlist.append([bullet, movementcoords])
+
+		elif type == "radiate": #Round laser that radiates more round lasers
+
+			bullet = canvas.create_image(x, y, anchor=N, image=enemylaserroundcross_image, tag=("fg","enemybullet","enemybulletspread","game","gameimage"))
+
+			spreadcounter = 0
+
+			enemybulletspreadlist.append([bullet, spreadcounter])
+
 
 	#Game Saving
 	def saveonclose():
@@ -314,7 +430,6 @@ def game_start(difficulty, ship, state="new"):
 		"""This is the main game loop"""
 
 		global x, y, velx, vely, shoot, pausestate, savestate, gametime, ship_stats, enemylist, attackinterval, score
-
 		savestate.seek(0)
 		savestate.truncate(0)
 
@@ -355,14 +470,14 @@ def game_start(difficulty, ship, state="new"):
 
 			if not(attackinterval % 10): # % x indicates fire rate
 
-				canvas.create_image(x0+90,y0+180, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","game","gameimage"))
-				canvas.create_image(x1-90,y0+180, image = playerlaserstraight_image, tag=("fg","bullet","playerbullet","game","gameimage"))
+				canvas.create_image(x0+90,y0+180, image = playerlaserstraight_image, tag=("fg","playerbullet","game","gameimage"))
+				canvas.create_image(x1-90,y0+180, image = playerlaserstraight_image, tag=("fg","playerbullet","game","gameimage"))
 
 			attackinterval += 1
 
 		else:	# Can think of this as preloading a shot
 
-			if (attackinterval % 10) != 0: # Fire rate number
+			if (attackinterval % 10) != 0:
 
 				attackinterval += 1
 
@@ -384,17 +499,82 @@ def game_start(difficulty, ship, state="new"):
 			#Movement
 			if enemystats["movement"] == "forward":
 				canvas.move(enemyitem, 0, enemystats["speed"])
+			elif enemystats["movement"] == "right":
+				canvas.move(enemyitem, enemystats["speed"], 0)
+			elif enemystats["movement"] == "left":
+				canvas.move(enemyitem, -enemystats["speed"], 0)
+			elif enemystats["movement"] == "diagonalright":
+				canvas.move(enemyitem, enemystats["speed"]*(math.sqrt(2)/2), enemystats["speed"]*(math.sqrt(2)/2))
+			elif enemystats["movement"] == "diagonalleft":
+				canvas.move(enemyitem, -enemystats["speed"]*(math.sqrt(2)/2), enemystats["speed"]*(math.sqrt(2)/2))
+			elif enemystats["movement"] == "followx": #Moves towards the x of the player ship
+				shipx = (x0+x1)/2
+				enemyx = (enemybbox[0]+enemybbox[2])/2
+				if enemyx < shipx-2:
+					canvas.move(enemyitem, enemystats["speed"], 0)
+				elif enemyx > shipx+2:
+					canvas.move(enemyitem, -enemystats["speed"], 0)
+			elif enemystats["movement"] == "stop":
+				#Maths to work out which direction to move the enemy to reach stopx and stopy
+				enemyx = (enemybbox[0]+enemybbox[2])/2
+				enemyy = (enemybbox[1]+enemybbox[3])/2
+				directDist = math.sqrt(((enemystats["stopx"]-enemyx) ** 2) + ((enemystats["stopy"]-enemyy) ** 2))
+				if directDist > 0:
+					movex = (enemystats["stopx"]-enemyx) / directDist
+					movey = (enemystats["stopy"]-enemyy) / directDist
+					canvas.move(enemy,movex*enemystats["speed"], movey*enemystats["speed"])
+
 
 			#Shooting
-			if enemystats["type"] == 1:
+			if enemystats["type"] == 1:	#Types 1 and 2 shoot the same, simple two shot laser
 
-				if not(gametime % 80):
+				if not(gametime % 70):
 
-					canvas.create_image(enemybbox[0]+15, enemybbox[3], anchor=N, image=enemylaserstraight_image, tag=("fg","bullet","enemybullet","enemybulletstraight","game","gameimage"))
-					canvas.create_image(enemybbox[2]-15, enemybbox[3], anchor=N, image=enemylaserstraight_image, tag=("fg","bullet","enemybullet","enemybulletstraight","game","gameimage"))
+					enemybullet("simple", enemybbox[0]+15, enemybbox[3])
+					enemybullet("simple", enemybbox[2]-15, enemybbox[3])
 
+			elif enemystats["type"] == 2:
 
-			# Enemy Collisions and Damage
+				if not(gametime % 70):
+
+					enemybullet("simple", enemybbox[0]+45, enemybbox[3])
+					enemybullet("simple", enemybbox[2]-45, enemybbox[3])
+
+			elif enemystats["type"] == 3:	#3 round burst fire (Not true burst fire, just spawns three lasers)
+
+				if not(gametime % 70):
+
+					enemybullet("simple", enemybbox[0]+24, enemybbox[3])
+					enemybullet("simple", enemybbox[0]+24, enemybbox[3]+42)
+					enemybullet("simple", enemybbox[0]+24, enemybbox[3]+84)
+
+			elif enemystats["type"] == 4:	#Round laser shot towards the player, a bit more complex compared to other bullet types
+
+				if not(gametime % 100):
+
+					shipx = (x0+x1)/2
+					shipy = (y0+y1)/2
+
+					enemybullet("track", enemybbox[0]+76, enemybbox[3], shipx, shipy)
+
+			elif enemystats["type"] == 5: #Special round bullet that radiates other round bullets
+
+				if not(gametime % 150):
+
+					enemybullet("radiate",enemybbox[0]+97, enemybbox[3])
+
+			elif enemystats["type"] == "boss": #A combination of the shooting types
+
+				if not(gametime % 150): #Cross Bullet
+
+					enemybullet("radiate", enemybbox[0]+97, enemybbox[3])
+
+				if not(gametime % 70) or not(gametime % 80) or not(gametime % 90):	#Burst fire
+
+					enemybullet("simple", enemybbox[0]+24, enemybbox[3])
+					enemybullet("simple", enemybbox[0]-24, enemybbox[3])
+
+			#Enemy Collisions and Damage
 			for bullet in canvas.find_withtag("playerbullet"):
 
 				bulletbbox = canvas.bbox(bullet)
@@ -415,7 +595,36 @@ def game_start(difficulty, ship, state="new"):
 
 							pass
 
-		canvas.move("enemybulletstraight", 0, 15)
+		#Enemy Bullet Movement
+		canvas.move("enemybulletstraight", 0, 10)
+
+		for bullet in enemybulletspreadlist: #Loop to spawn radiating bullets around spread type bullets
+			canvas.move(bullet[0], 0, 5)
+			if not(bullet[1] % 50) and (bullet[1] != 0):
+
+				bulletbbox = canvas.bbox(bullet[0])
+				bulletx = (bulletbbox[0]+bulletbbox[2])/2
+				bullety = (bulletbbox[1]+bulletbbox[3])/2
+
+				dist = 2	#Spawn distance fron the cross bullet
+				distdiag = dist*(math.sqrt(2)/2)
+				movex = [0, distdiag, dist, distdiag, 0, -distdiag, -dist, -distdiag] #N, NE, E, SE, S, SW, W, NW
+				movey = [-dist, -distdiag, 0, distdiag, dist, distdiag, 0, -distdiag]
+
+				for i in range (8):
+
+					bulletcreate = canvas.create_image(bulletx+movex[i], bullety+movey[i], anchor=N, image=enemylaserround_image, tag=("fg","enemybullet","enemybullettrack","game","gameimage"))
+
+					movementcoords = [movex[i], movey[i]]
+
+					specialenemybulletlist.append([bulletcreate, movementcoords])
+
+
+			bullet[1] += 1
+
+		for bullet in specialenemybulletlist:	#For bullets that don't go straight down
+
+			canvas.move(bullet[0], bullet[1][0], bullet[1][1])
 
 
 		#Player Collision and Damage
@@ -424,34 +633,65 @@ def game_start(difficulty, ship, state="new"):
 			bulletbbox = canvas.bbox(bullet)
 			hitboxbbox = canvas.bbox(hitbox)
 
-			if (bulletbbox[3] >= hitboxbbox[1]) and (bulletbbox[1] <= hitboxbbox[3]) and (bulletbbox[2] >= hitboxbbox[0]) and (bulletbbox[0] <= hitboxbbox[2]): 
+			if (bulletbbox[3]-12 >= hitboxbbox[1]) and (bulletbbox[1]+12 <= hitboxbbox[3]) and (bulletbbox[2]-12 >= hitboxbbox[0]) and (bulletbbox[0]+12 <= hitboxbbox[2]): 
 
-				canvas.delete(bullet)
 				ship_stats["health"] -= 1 #Damage calculation, implement variable base damage in the future
 				canvas.coords(healthbarfg, 0, 1070, 900*(ship_stats["health"]/100), 1070)
 
+				#Need to make sure the bullet is also removed from the list
+				for bullet2 in specialenemybulletlist:
+					if bullet == bullet2[0]:
+						specialenemybulletlist.remove(bullet2)
+
+				for bullet2 in enemybulletspreadlist:
+					if bullet == bullet2[0]:
+						enemybulletspreadlist.remove(bullet2)
+
+				canvas.delete(bullet)
+
 				if ship_stats["health"] <=0:
+
 					return
 
-
-
-
-
 		#Stages
-		if gametime == 0:
-			enemylist.append(enemy_spawn(1, 450, 0, "forward"))
+		if gametime == 20:
+			enemylist.append(enemy_spawn(5, 225, 200, "stop", 225, 200))
+			# enemylist.append(enemy_spawn(1, 625, 0, "forward"))
 
 
 		#Autosave
-		savestate.write(str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "~" + str(score) + "\n")
+		savestate.write(" " + str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "~" + json.dumps(specialenemybulletlist) + "~" +json.dumps(enemybulletspreadlist) + "~" + str(score) + "\n")
 		for item in canvas.find_withtag("gameimage"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
 
 			savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
 
 		#Cleaning
-		for bullet in canvas.find_withtag("bullet"): # Clears bullets that exit the canvas
+		for bullet in canvas.find_withtag("playerbullet"): # Clears bullets that exit the canvas
+
 			if canvas.coords(bullet)[1] <= -100:
 				canvas.delete(bullet)
+
+		for bullet in canvas.find_withtag("enemybullet"): # Clears bullets that exit the canvas
+
+			if canvas.coords(bullet)[1] >= 1080+10:
+
+				#Need to make sure the bullet is also removed from the list
+				for bullet2 in specialenemybulletlist:
+					if bullet == bullet2[0]:
+						specialenemybulletlist.remove(bullet2)
+
+				for bullet2 in enemybulletspreadlist:
+					if bullet == bullet2[0]:
+						enemybulletspreadlist.remove(bullet2)
+
+				canvas.delete(bullet)
+
+		for enemy in enemylist:
+			enemyx, enemyy = canvas.coords(enemy[0])
+			if enemyy >= 1080+200:
+				canvas.delete(enemy)
+				enemylist.remove(enemy)
+
 
 		#Pausing
 		if pausestate == True:
@@ -494,12 +734,21 @@ about_image = PhotoImage(file="Assets/placeholder.png")
 
 #Player Ship 
 ship_image = PhotoImage(file="Assets/aship1.png")
+#Player Bullets
 playerlaserstraight_image = PhotoImage(file="Assets/playerlaserstraight.png")
 playerlaserround_image = PhotoImage(file="Assets/playerlaserround.png")
 
 #Enemies
 enemy1_image = PhotoImage(file="Assets/enemy1.png")
+enemy2_image = PhotoImage(file="Assets/enemy2.png")
+enemy3_image = PhotoImage(file="Assets/enemy3.png")
+enemy4_image = PhotoImage(file="Assets/enemy4.png")
+enemy5_image = PhotoImage(file="Assets/enemy5.png")
+boss1_image = PhotoImage(file="Assets/boss1.png")
+#Enemy Bullets
 enemylaserstraight_image = PhotoImage(file="Assets/enemylaserstraight.png")
+enemylaserround_image = PhotoImage(file="Assets/enemylaserround.png")
+enemylaserroundcross_image = PhotoImage(file="Assets/enemylaserroundcross.png")
 
 menu()
 window.mainloop()
