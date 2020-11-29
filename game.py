@@ -4,7 +4,7 @@ import time, json, math
 
 def menu(menutype="default"):
 	"""Creates a menu, takes arguments so that different menus can be chosen"""
-
+	global windowheight, windowlength
 	canvas.delete("fg") #Removes all foreground canvas items
 
 	settings = ConfigParser()
@@ -18,20 +18,20 @@ def menu(menutype="default"):
 		loadgame_button = Button(window, text="Load Game", font = ("Impact", 50), command = lambda difficulty = None, ship = None, state="saved": game_start(difficulty, ship, state))
 
 
-		canvas.create_window(450, 350, anchor=CENTER, window=newgame_button, tags="fg")
-		canvas.create_window(450, 550, anchor=CENTER, window=loadgame_button, tags="fg")
+		canvas.create_window(windowlength/2, 350, anchor=CENTER, window=newgame_button, tags="fg")
+		canvas.create_window(windowlength/2, 550, anchor=CENTER, window=loadgame_button, tags="fg")
 
-		canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+		canvas.create_window(0,windowheight, anchor=SW, window=back_button, tags="fg")
 
 	elif menutype == "chooseship":
 
-		ship = canvas.create_image(450,540,image = ship_image, tags="fg")
+		ship = canvas.create_image(windowlength/2,540,image = ship_image, tags="fg")
 
 		choose_button = Button(window, text="Choose", font = ("Impact", 50),  command=lambda menutype="difficulty": menu(menutype))
-		canvas.create_window(450,800, anchor=CENTER, window=choose_button, tags="fg")
+		canvas.create_window(windowlength/2, 800, anchor=CENTER, window=choose_button, tags="fg")
 
 		back_button.config(command = lambda menutype="play": menu(menutype))
-		canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+		canvas.create_window(0,windowheight, anchor=SW, window=back_button, tags="fg")
 
 
 	elif menutype == "difficulty":
@@ -40,13 +40,13 @@ def menu(menutype="default"):
 		normal_button = Button(window, text="Normal", font = ("Impact", 50), command = lambda difficulty = "normal", ship = "ship": game_start(difficulty, ship))
 		hard_button = Button(window, text="Hard", font = ("Impact", 50), command = lambda difficulty = "hard", ship = "ship": game_start(difficulty, ship))
 
-		canvas.create_window(450, 350, anchor=CENTER, window=easy_button, tags="fg")
-		canvas.create_window(450, 550, anchor=CENTER, window=normal_button, tags="fg")
-		canvas.create_window(450, 750, anchor=CENTER, window=hard_button, tags="fg")
+		canvas.create_window(windowlength/2, 350, anchor=CENTER, window=easy_button, tags="fg")
+		canvas.create_window(windowlength/2, 550, anchor=CENTER, window=normal_button, tags="fg")
+		canvas.create_window(windowlength/2, 750, anchor=CENTER, window=hard_button, tags="fg")
 
 
 		back_button.config(command = lambda menutype="chooseship": menu(menutype))
-		canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+		canvas.create_window(0,windowheight, anchor=SW, window=back_button, tags="fg")
 
 
 	elif menutype == "settings":
@@ -66,26 +66,26 @@ def menu(menutype="default"):
 			command = lambda control = "Pause", button = 5: changekey(control, button))
 
 		controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button, changeright_button, changepause_button] #This is needed to update the key shown on the button
-		canvas.create_image(450,100, anchor=CENTER, image=settingsTitle_image, tags="fg")
+		canvas.create_image(windowlength/2,100, anchor=CENTER, image=settingsTitle_image, tags="fg")
 
-		canvas.create_image(450,200, anchor=CENTER, image=controlsTitle_image, tags="fg")
+		canvas.create_image(windowlength/2,200, anchor=CENTER, image=controlsTitle_image, tags="fg")
 
-		canvas.create_window(450, 300, anchor=CENTER, window=changeshoot_button, tags="fg")
+		canvas.create_window(windowlength/2, 300, anchor=CENTER, window=changeshoot_button, tags="fg")
 
-		canvas.create_window(450, 450, anchor=CENTER, window=changeforward_button, tags="fg")
-		canvas.create_window(450, 575, anchor=CENTER, window=changebackward_button, tags="fg")
+		canvas.create_window(windowlength/2, 450, anchor=CENTER, window=changeforward_button, tags="fg")
+		canvas.create_window(windowlength/2, 575, anchor=CENTER, window=changebackward_button, tags="fg")
 		canvas.create_window(225, 500, anchor=CENTER, window=changeleft_button, tags="fg")
 		canvas.create_window(675, 500, anchor=CENTER, window=changeright_button, tags="fg")
-		canvas.create_window(450, 725, anchor=CENTER, window=changepause_button, tags="fg")
+		canvas.create_window(windowlength/2, 725, anchor=CENTER, window=changepause_button, tags="fg")
 
-		canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")
+		canvas.create_window(0,windowheight, anchor=SW, window=back_button, tags="fg")
 
 	elif menutype == "about":
 
 		about_label = Label(window, image=about_image)
-		about_canvaswindow = canvas.create_window(450,800, anchor=CENTER, window=about_label, tags="fg")
+		about_canvaswindow = canvas.create_window(windowlength/2,800, anchor=CENTER, window=about_label, tags="fg")
 
-		back_canvaswindow = canvas.create_window(0,1080, anchor=SW, window=back_button, tags="fg")		
+		back_canvaswindow = canvas.create_window(0,windowheight, anchor=SW, window=back_button, tags="fg")		
 
 	else: # This is the default menutype i.e. the main menu
 
@@ -95,18 +95,19 @@ def menu(menutype="default"):
 		about_button = Button(window, text="About", font = ("Impact", 50), command= lambda menutype="about": menu(menutype))
 		exit_button = Button(window, text="Exit", font = ("Impact", 50), command= lambda: window.destroy())
 
-		canvas.create_window(450,100, anchor=CENTER, window=title_label, tags="fg")
-		canvas.create_window(450,350, anchor=CENTER, window=play_button, tags="fg")
-		canvas.create_window(450,550, anchor=CENTER, window=settings_button, tags="fg")
-		canvas.create_window(450,750, anchor=CENTER, window=about_button, tags="fg")
-		canvas.create_window(450,950, anchor=CENTER, window=exit_button, tags="fg")
+		canvas.create_window(windowlength/2,100, anchor=CENTER, window=title_label, tags="fg")
+		canvas.create_window(windowlength/2,350, anchor=CENTER, window=play_button, tags="fg")
+		canvas.create_window(windowlength/2,550, anchor=CENTER, window=settings_button, tags="fg")
+		canvas.create_window(windowlength/2,750, anchor=CENTER, window=about_button, tags="fg")
+		canvas.create_window(windowlength/2,950, anchor=CENTER, window=exit_button, tags="fg")
 
 def changekey(control, button):
 	"""Starts the control key change process, takes the specific control being changed and the value of the button that was pressed"""
+	global windowheight, windowlength
 	def change(key):
 		"""Changes the key in the settings.ini file to hte key the user pressed"""
 
-		global controls
+		global controls, windowheight, windowlength
 		canvas.delete(keyprompt_canvaswindow) 
 
 		settings = ConfigParser()
@@ -124,7 +125,7 @@ def changekey(control, button):
 		window.unbind("<Key>")
 
 	keyprompt_label = Label(window, text="Press a key...", font = ("Impact", 30), width=500, height=600)
-	keyprompt_canvaswindow = canvas.create_window(450, 540, anchor=CENTER, window=keyprompt_label, tags="fg")
+	keyprompt_canvaswindow = canvas.create_window(windowlength/2, 540, anchor=CENTER, window=keyprompt_label, tags="fg")
 
 	window.bind("<Key>", change)
 
@@ -133,17 +134,17 @@ def game_start(difficulty, ship, state="new"):
 
 	canvas.delete("fg")
 
-	global maxvelocity, velx, vely, shoot, pausestate, savestate, gametime, enemylist, ship_stats, attackinterval, score
+	global windowheight, windowlength, maxvelocity, velx, vely, shoot, pausestate, bossstate, savestate, gametime, enemylist, ship_stats, attackinterval, score
 	maxvelocity = 8
 	velx, vely, gametime, attackinterval, score = 0, 0, 0, 0, 0
-	shoot, pausestate = False, False
+	shoot, pausestate, bossstate = False, False, False
 
 
 	#Start New or Saved Game
 	if state == "new": # New Game
 
-		hitbox = canvas.create_oval(450-11,1080+116,450+12,1080+116+27, tags=("fg", "ship","game"))
-		canvas.create_image(450, 1080, anchor = N, image = ship_image, tags=("fg", "game", "ship", "shipbody","gameimage"))	
+		hitbox = canvas.create_oval(windowlength/2-11,windowheight+116,windowlength/2+12,windowheight+116+27, tags=("fg", "ship","game"))
+		canvas.create_image(windowlength/2, windowheight, anchor = N, image = ship_image, tags=("fg", "game", "ship", "shipbody","gameimage"))	
 
 		ship_stats = {
 			"type": 1,
@@ -154,7 +155,7 @@ def game_start(difficulty, ship, state="new"):
 		}
 
 		enemylist = []
-		specialenemybulletlist = []
+		enemybulletspeciallist = []
 		enemybulletspreadlist = []
 
 		# Neat little for loop here to have the ship enter the scene with a simple animation
@@ -183,7 +184,7 @@ def game_start(difficulty, ship, state="new"):
 			gametime = int(information[0])
 			ship_stats = json.loads(information[1])
 			enemylist = json.loads(information[2])
-			specialenemybulletlist = json.loads(information[3])
+			enemybulletspeciallist = json.loads(information[3])
 			enemybulletspreadlist = json.loads(information[4])
 			score = int(information[5])
 
@@ -226,9 +227,9 @@ def game_start(difficulty, ship, state="new"):
 
 			#Same for the tracking bullets and spread bullets too
 			i = 0
-			for bullet in canvas.find_withtag("enemybullettrack"):
+			for bullet in canvas.find_withtag("enemybulletspecial"):
 
-				specialenemybulletlist[i][0] = bullet
+				enemybulletspeciallist[i][0] = bullet
 				i += 1
 
 			i = 0
@@ -244,9 +245,9 @@ def game_start(difficulty, ship, state="new"):
 	#UI Elements
 	score_label = Label(window, text="Score: " + str(score).zfill(10), font = ("Impact", 18))
 
-	canvas.create_window(900, 0, anchor=NE, window=score_label, tags=("fg", "game"))
-	healthbarbg = canvas.create_line(0, 1070, 900, 1070, fill="red", width=10, tags=("fg", "game"))
-	healthbarfg = canvas.create_line(0, 1070, 900, 1070, fill="green", width=10, tags=("fg", "game"))
+	canvas.create_window(windowlength, 0, anchor=NE, window=score_label, tags=("fg", "game"))
+	healthbarbg = canvas.create_line(0, windowheight-10, windowlength, windowheight-10, fill="red", width=10, tags=("fg", "game"))
+	healthbarfg = canvas.create_line(0, windowheight-10, windowlength, windowheight-10, fill="green", width=10, tags=("fg", "game"))
 
 
 	#Player Movement and shooting
@@ -255,7 +256,7 @@ def game_start(difficulty, ship, state="new"):
 
 	def key_press(event):
 		"""Records key presses for controls"""
-		global velx, vely, shoot, pausestate
+		global velx, vely, shoot, pausestate, bossstate
 
 		#Movement
 		if event.keysym.upper() == settings["CONTROLS"]["Forward"].upper() and vely > -maxvelocity:
@@ -275,6 +276,8 @@ def game_start(difficulty, ship, state="new"):
 		#Pause
 		if event.keysym.upper() == settings["CONTROLS"]["Pause"].upper():
 			pausestate = True
+		if event.keysym.upper() == settings["CONTROLS"]["Bosskey"].upper():
+			bossstate = True
 
 	def key_release(event):
 		"""Records when a key is released for movement and shooting"""
@@ -389,9 +392,9 @@ def game_start(difficulty, ship, state="new"):
 
 			canvas.create_image(x, y, anchor=N, image=enemylaserstraight_image, tag=("fg","enemybullet","enemybulletstraight","game","gameimage"))
 
-		elif type == "track": #Round laser that is pointed towards given player position
+		elif type == "special": #Round laser that is pointed towards given player position
 
-			bullet = canvas.create_image(x, y, anchor=N, image=enemylaserround_image, tag=("fg","enemybullet","enemybullettrack","game","gameimage"))
+			bullet = canvas.create_image(x, y, anchor=N, image=enemylaserround_image, tag=("fg","enemybullet","enemybulletspecial","game","gameimage"))
 
 			#Maths to work out which direction the bullet needs to move in to move towards the player position
 			bulletbbox = canvas.bbox(bullet)
@@ -403,7 +406,7 @@ def game_start(difficulty, ship, state="new"):
 			movementcoords = [movex*10, movey*10]
 
 			#Need to keep track of which bullet is moving in what direction
-			specialenemybulletlist.append([bullet, movementcoords])
+			enemybulletspeciallist.append([bullet, movementcoords])
 
 		elif type == "radiate": #Round laser that radiates more round lasers
 
@@ -417,11 +420,17 @@ def game_start(difficulty, ship, state="new"):
 	#Game Saving
 	def saveonclose():
 		"""Saves the game state on window close"""
+		savestate.write(" " + str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "~" + json.dumps(enemybulletspeciallist) + "~" +json.dumps(enemybulletspreadlist) + "~" + str(score) + "\n")
+
+		for item in canvas.find_withtag("gameimage"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
+
+			savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
+
 		savestate.close()
 		window.destroy()
 
 	def saveonreturn():
-		"""Saves the game state when returning to main menu"""
+		"""Saves the game state when returning to main menu. Just closes the savestate.txt file, actually saving happens on pause"""
 		savestate.close()
 		menu()
 
@@ -429,9 +438,11 @@ def game_start(difficulty, ship, state="new"):
 	def game_loop():
 		"""This is the main game loop"""
 
-		global x, y, velx, vely, shoot, pausestate, savestate, gametime, ship_stats, enemylist, attackinterval, score
+		global windowheight, windowlength, x, y, velx, vely, shoot, pausestate, bossstate, savestate, gametime, ship_stats, enemylist, attackinterval, score
 		savestate.seek(0)
 		savestate.truncate(0)
+
+		gamespeed = 1
 
 		canvas.itemconfig("game",state = "normal" )
 		canvas.delete("pausebutton")
@@ -439,7 +450,7 @@ def game_start(difficulty, ship, state="new"):
 		window.protocol("WM_DELETE_WINDOW", saveonclose)
 
 		score_label.config(text="Score: " + str(score).zfill(10))
-		canvas.coords(healthbarfg, 0, 1070, 900*(ship_stats["health"]/100), 1070) #Assuming max health is 100
+		canvas.coords(healthbarfg, 0, windowheight-10, windowlength*(ship_stats["health"]/100), windowheight-10) #Assuming max health is 100
 
 		#Player Movement
 		x, y = 0, 0
@@ -468,7 +479,7 @@ def game_start(difficulty, ship, state="new"):
 		# Player Shooting
 		if shoot == True:
 
-			if not(attackinterval % 10): # % x indicates fire rate
+			if not(attackinterval % (10/gamespeed)): # % x indicates fire rate
 
 				canvas.create_image(x0+90,y0+180, image = playerlaserstraight_image, tag=("fg","playerbullet","game","gameimage"))
 				canvas.create_image(x1-90,y0+180, image = playerlaserstraight_image, tag=("fg","playerbullet","game","gameimage"))
@@ -477,14 +488,14 @@ def game_start(difficulty, ship, state="new"):
 
 		else:	# Can think of this as preloading a shot
 
-			if (attackinterval % 10) != 0:
+			if (attackinterval % (10/gamespeed)) != 0:
 
 				attackinterval += 1
 
 			#For creating round bullets on higher ship levels
 			# 	canvas.create_image(x1,y1, image = playerlaserround_image, tag = ("fg","playerbullet"))
 	
-		canvas.move("playerbullet", 0 , -30)
+		canvas.move("playerbullet", 0 , -30*gamespeed)
 		# canvas.move("round", 0 , -150)
 
 
@@ -498,22 +509,22 @@ def game_start(difficulty, ship, state="new"):
 
 			#Movement
 			if enemystats["movement"] == "forward":
-				canvas.move(enemyitem, 0, enemystats["speed"])
+				canvas.move(enemyitem, 0, enemystats["speed"]*gamespeed)
 			elif enemystats["movement"] == "right":
-				canvas.move(enemyitem, enemystats["speed"], 0)
+				canvas.move(enemyitem, enemystats["speed"]*gamespeed, 0)
 			elif enemystats["movement"] == "left":
-				canvas.move(enemyitem, -enemystats["speed"], 0)
+				canvas.move(enemyitem, -enemystats["speed"]*gamespeed, 0)
 			elif enemystats["movement"] == "diagonalright":
-				canvas.move(enemyitem, enemystats["speed"]*(math.sqrt(2)/2), enemystats["speed"]*(math.sqrt(2)/2))
+				canvas.move(enemyitem, enemystats["speed"]*(math.sqrt(2)/2)*gamespeed, enemystats["speed"]*(math.sqrt(2)/2)*gamespeed)
 			elif enemystats["movement"] == "diagonalleft":
-				canvas.move(enemyitem, -enemystats["speed"]*(math.sqrt(2)/2), enemystats["speed"]*(math.sqrt(2)/2))
+				canvas.move(enemyitem, -enemystats["speed"]*(math.sqrt(2)/2)*gamespeed, enemystats["speed"]*(math.sqrt(2)/2)*gamespeed)
 			elif enemystats["movement"] == "followx": #Moves towards the x of the player ship
 				shipx = (x0+x1)/2
 				enemyx = (enemybbox[0]+enemybbox[2])/2
 				if enemyx < shipx-2:
-					canvas.move(enemyitem, enemystats["speed"], 0)
+					canvas.move(enemyitem, enemystats["speed"]*gamespeed, 0)
 				elif enemyx > shipx+2:
-					canvas.move(enemyitem, -enemystats["speed"], 0)
+					canvas.move(enemyitem, -enemystats["speed"]*gamespeed, 0)
 			elif enemystats["movement"] == "stop":
 				#Maths to work out which direction to move the enemy to reach stopx and stopy
 				enemyx = (enemybbox[0]+enemybbox[2])/2
@@ -522,27 +533,27 @@ def game_start(difficulty, ship, state="new"):
 				if directDist > 0:
 					movex = (enemystats["stopx"]-enemyx) / directDist
 					movey = (enemystats["stopy"]-enemyy) / directDist
-					canvas.move(enemy,movex*enemystats["speed"], movey*enemystats["speed"])
+					canvas.move(enemy,movex*enemystats["speed"]*gamespeed, movey*enemystats["speed"]*gamespeed)
 
 
 			#Shooting
 			if enemystats["type"] == 1:	#Types 1 and 2 shoot the same, simple two shot laser
 
-				if not(gametime % 70):
+				if not(gametime % (70/gamespeed)):
 
 					enemybullet("simple", enemybbox[0]+15, enemybbox[3])
 					enemybullet("simple", enemybbox[2]-15, enemybbox[3])
 
 			elif enemystats["type"] == 2:
 
-				if not(gametime % 70):
+				if not(gametime % (70/gamespeed)):
 
 					enemybullet("simple", enemybbox[0]+45, enemybbox[3])
 					enemybullet("simple", enemybbox[2]-45, enemybbox[3])
 
 			elif enemystats["type"] == 3:	#3 round burst fire (Not true burst fire, just spawns three lasers)
 
-				if not(gametime % 70):
+				if not(gametime % (70/gamespeed)):
 
 					enemybullet("simple", enemybbox[0]+24, enemybbox[3])
 					enemybullet("simple", enemybbox[0]+24, enemybbox[3]+42)
@@ -550,38 +561,32 @@ def game_start(difficulty, ship, state="new"):
 
 			elif enemystats["type"] == 4:	#Round laser shot towards the player, a bit more complex compared to other bullet types
 
-				if not(gametime % 100):
+				if not(gametime % (100/gamespeed)):
 
 					shipx = (x0+x1)/2
 					shipy = (y0+y1)/2
 
-					enemybullet("track", enemybbox[0]+76, enemybbox[3], shipx, shipy)
+					enemybullet("special", enemybbox[0]+76, enemybbox[3], shipx, shipy)
 
 			elif enemystats["type"] == 5: #Special round bullet that radiates other round bullets
 
-				if not(gametime % 150):
+				if not(gametime % (150/gamespeed)):
 
 					enemybullet("radiate",enemybbox[0]+97, enemybbox[3])
 
 			elif enemystats["type"] == "boss": #A combination of the shooting types
 
-				if not(gametime % 150): #Cross Bullet
+				if not(gametime % (150/gamespeed)): #Cross Bullet
 
 					enemybullet("radiate", enemybbox[0]+97, enemybbox[3])
 
-				if not(gametime % 70) or not(gametime % 80) or not(gametime % 90):	#Burst fire
-
-					enemybullet("simple", enemybbox[0]+24, enemybbox[3])
-					enemybullet("simple", enemybbox[0]-24, enemybbox[3])
-
 			#Enemy Collisions and Damage
-			for bullet in canvas.find_withtag("playerbullet"):
+			for collision in canvas.find_overlapping(enemybbox[0],enemybbox[1],enemybbox[2],enemybbox[3]):
 
-				bulletbbox = canvas.bbox(bullet)
+				if "playerbullet" in canvas.gettags(collision):
 
-				if (bulletbbox[3] >= enemybbox[1]) and (bulletbbox[1] <= enemybbox[3]) and (bulletbbox[2] >= enemybbox[0]) and (bulletbbox[0] <= enemybbox[2]): #If the bullet is within the bounds of the enemy ship
+					canvas.delete(collision)
 
-					canvas.delete(bullet)
 					enemystats["health"] -= 10 * ship_stats["damagemultiplier"] #Damage calculation, implement variable base damage in the future
 
 					if enemystats["health"] <=0:
@@ -595,116 +600,110 @@ def game_start(difficulty, ship, state="new"):
 
 							pass
 
-		#Enemy Bullet Movement
-		canvas.move("enemybulletstraight", 0, 10)
 
+
+		#Enemy Bullet Movement
+		canvas.move("enemybulletstraight", 0, 10*gamespeed)
+
+		canvas.move("enemybulletspread", 0, 5*gamespeed)
 		for bullet in enemybulletspreadlist: #Loop to spawn radiating bullets around spread type bullets
-			canvas.move(bullet[0], 0, 5)
-			if not(bullet[1] % 50) and (bullet[1] != 0):
+			if not(bullet[1] % (50/gamespeed)) and (bullet[1] != 0):
 
 				bulletbbox = canvas.bbox(bullet[0])
 				bulletx = (bulletbbox[0]+bulletbbox[2])/2
 				bullety = (bulletbbox[1]+bulletbbox[3])/2
 
 				dist = 2	#Spawn distance fron the cross bullet
-				distdiag = dist*(math.sqrt(2)/2)
-				movex = [0, distdiag, dist, distdiag, 0, -distdiag, -dist, -distdiag] #N, NE, E, SE, S, SW, W, NW
-				movey = [-dist, -distdiag, 0, distdiag, dist, distdiag, 0, -distdiag]
 
 				for i in range (8):
+					movex = dist*math.sin(math.pi*(i/4))
+					movey = dist*math.cos(math.pi*(i/4))
+					bulletcreate = canvas.create_image(bulletx+movex, bullety+movey, anchor=N, image=enemylaserround_image, tag=("fg","enemybullet","enemybulletspecial","game","gameimage"))
 
-					bulletcreate = canvas.create_image(bulletx+movex[i], bullety+movey[i], anchor=N, image=enemylaserround_image, tag=("fg","enemybullet","enemybullettrack","game","gameimage"))
+					movementcoords = [movex, movey]
 
-					movementcoords = [movex[i], movey[i]]
-
-					specialenemybulletlist.append([bulletcreate, movementcoords])
+					enemybulletspeciallist.append([bulletcreate, movementcoords])
 
 
 			bullet[1] += 1
 
-		for bullet in specialenemybulletlist:	#For bullets that don't go straight down
+		for bullet in enemybulletspeciallist:	#For bullets that don't go straight down
 
-			canvas.move(bullet[0], bullet[1][0], bullet[1][1])
+			canvas.move(bullet[0], bullet[1][0]*gamespeed, bullet[1][1]*gamespeed)
 
 
 		#Player Collision and Damage
-		for bullet in canvas.find_withtag("enemybullet"):
+		hitboxbbox = canvas.bbox(hitbox)
+		for collision in canvas.find_overlapping(hitboxbbox[0]+12,hitboxbbox[1]+12,hitboxbbox[2]-12,hitboxbbox[3]-12):
 
-			bulletbbox = canvas.bbox(bullet)
-			hitboxbbox = canvas.bbox(hitbox)
-
-			if (bulletbbox[3]-12 >= hitboxbbox[1]) and (bulletbbox[1]+12 <= hitboxbbox[3]) and (bulletbbox[2]-12 >= hitboxbbox[0]) and (bulletbbox[0]+12 <= hitboxbbox[2]): 
+			if "enemybullet" in canvas.gettags(collision):
 
 				ship_stats["health"] -= 1 #Damage calculation, implement variable base damage in the future
-				canvas.coords(healthbarfg, 0, 1070, 900*(ship_stats["health"]/100), 1070)
+				canvas.coords(healthbarfg, 0, windowheight-10, windowlength*(ship_stats["health"]/100), windowheight-10)
 
 				#Need to make sure the bullet is also removed from the list
-				for bullet2 in specialenemybulletlist:
-					if bullet == bullet2[0]:
-						specialenemybulletlist.remove(bullet2)
+				for bullet2 in enemybulletspeciallist:
+					if collision == bullet2[0]:
+						enemybulletspeciallist.remove(bullet2)
 
 				for bullet2 in enemybulletspreadlist:
-					if bullet == bullet2[0]:
+					if collision == bullet2[0]:
 						enemybulletspreadlist.remove(bullet2)
 
-				canvas.delete(bullet)
+				canvas.delete(collision)
 
 				if ship_stats["health"] <=0:
 
 					return
+
+
+		#Cleaning
+		for item in canvas.find_withtag("game"):
+			if item in canvas.find_overlapping(0, 0, windowlength, windowheight):
+				pass
+			else:
+				for item2 in enemylist:
+					if item == item2[0]:
+						enemylist.remove(item2)
+				for item2 in enemybulletspeciallist:
+					if item == item2[0]:
+						enemybulletspeciallist.remove(item2)
+				for item2 in enemybulletspreadlist:
+					if item == item2[0]:
+						enemybulletspreadlist.remove(item2)
+				canvas.delete(item)
+
 
 		#Stages
 		if gametime == 20:
 			enemylist.append(enemy_spawn(5, 225, 200, "stop", 225, 200))
 			# enemylist.append(enemy_spawn(1, 625, 0, "forward"))
 
-
-		#Autosave
-		savestate.write(" " + str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "~" + json.dumps(specialenemybulletlist) + "~" +json.dumps(enemybulletspreadlist) + "~" + str(score) + "\n")
-		for item in canvas.find_withtag("gameimage"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
-
-			savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
-
-		#Cleaning
-		for bullet in canvas.find_withtag("playerbullet"): # Clears bullets that exit the canvas
-
-			if canvas.coords(bullet)[1] <= -100:
-				canvas.delete(bullet)
-
-		for bullet in canvas.find_withtag("enemybullet"): # Clears bullets that exit the canvas
-
-			if canvas.coords(bullet)[1] >= 1080+10:
-
-				#Need to make sure the bullet is also removed from the list
-				for bullet2 in specialenemybulletlist:
-					if bullet == bullet2[0]:
-						specialenemybulletlist.remove(bullet2)
-
-				for bullet2 in enemybulletspreadlist:
-					if bullet == bullet2[0]:
-						enemybulletspreadlist.remove(bullet2)
-
-				canvas.delete(bullet)
-
-		for enemy in enemylist:
-			enemyx, enemyy = canvas.coords(enemy[0])
-			if enemyy >= 1080+200:
-				canvas.delete(enemy)
-				enemylist.remove(enemy)
-
-
 		#Pausing
-		if pausestate == True:
+		if pausestate or bossstate:
 
-				canvas.itemconfig("game",state = "hidden" )
+			#Game Save
+			savestate.write(" " + str(gametime) + "~" + json.dumps(ship_stats) + "~" + json.dumps(enemylist) + "~" + json.dumps(enemybulletspeciallist) + "~" +json.dumps(enemybulletspreadlist) + "~" + str(score) + "\n")
+			for item in canvas.find_withtag("gameimage"):	# Finds every canvas item with tag "game" and saves their coordinates and configuration
+
+				savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
+
+			canvas.itemconfig("game",state = "hidden" )
+
+			if pausestate:
 
 				resume_button =  Button(window, text="Resume", font = ("Impact", 50), command = game_loop )
 				mainmenu_button =  Button(window, text="Main Menu", font = ("Impact", 50), command = saveonreturn)
 
-				canvas.create_window(450,300, anchor=CENTER, window=resume_button, tags=("fg", "pausebutton"))
-				canvas.create_window(450,500, anchor=CENTER, window=mainmenu_button, tags=("fg", "pausebutton"))
+				canvas.create_window(windowlength/2,300, anchor=CENTER, window=resume_button, tags=("fg", "pausebutton"))
+				canvas.create_window(windowlength/2,500, anchor=CENTER, window=mainmenu_button, tags=("fg", "pausebutton"))
 
-				pausestate = False
+			elif bossstate:
+
+				bosskey_label = Label(window, image=bosskey_image, tags=("fg", "pausebutton"))
+
+			pausestate = False
+			bossstate = False
 
 		else:
 			gametime += 1
@@ -714,10 +713,11 @@ def game_start(difficulty, ship, state="new"):
 
 
 window = Tk()
+windowlength = 900
+windowheight = 1017
+window.geometry(str(windowlength)+"x"+str(windowheight))
 
-window.geometry('900x1080')
-
-canvas = Canvas(window, width=900, height=1080, bg="blue")
+canvas = Canvas(window, width=windowlength, height=windowheight, bg="blue")
 
 background_image = PhotoImage(file="Assets/bkgd_0.png")
 canvas.create_image(0,0, anchor=NW, image=background_image)
