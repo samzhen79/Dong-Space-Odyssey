@@ -64,8 +64,10 @@ def menu(menutype="default"):
 			command = lambda control = "Right", button = 4: changekey(control, button))
 		changepause_button = Button(window, text = "Pause key is: \n' " + settings["CONTROLS"]["Pause"] + " '\nPress to change key.", font = ("Impact", 18), 
 			command = lambda control = "Pause", button = 5: changekey(control, button))
+		changebosskey_button = Button(window, text = "Bosskey key is: \n' " + settings["CONTROLS"]["Bosskey"] + " '\nPress to change key.", font = ("Impact", 18), 
+			command = lambda control = "Bosskey", button = 6: changekey(control, button))
 
-		controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button, changeright_button, changepause_button] #This is needed to update the key shown on the button
+		controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button, changeright_button, changepause_button, changebosskey_button] #This is needed to update the key shown on the button
 		canvas.create_image(windowlength/2,100, anchor=CENTER, image=settingsTitle_image, tags="fg")
 
 		canvas.create_image(windowlength/2,200, anchor=CENTER, image=controlsTitle_image, tags="fg")
@@ -77,6 +79,7 @@ def menu(menutype="default"):
 		canvas.create_window(225, 500, anchor=CENTER, window=changeleft_button, tags="fg")
 		canvas.create_window(675, 500, anchor=CENTER, window=changeright_button, tags="fg")
 		canvas.create_window(windowlength/2, 725, anchor=CENTER, window=changepause_button, tags="fg")
+		canvas.create_window(windowlength/2, 850, anchor=CENTER, window=changebosskey_button, tags="fg")
 
 		canvas.create_window(0,windowheight, anchor=SW, window=back_button, tags="fg")
 
@@ -86,6 +89,9 @@ def menu(menutype="default"):
 		about_canvaswindow = canvas.create_window(windowlength/2,800, anchor=CENTER, window=about_label, tags="fg")
 
 		back_canvaswindow = canvas.create_window(0,windowheight, anchor=SW, window=back_button, tags="fg")		
+
+	elif menutype == "leaderboard":
+		pass
 
 	else: # This is the default menutype i.e. the main menu
 
@@ -684,19 +690,22 @@ def game_start(difficulty, ship, state="new"):
 
 				savestate.write(str(canvas.coords(item)) + "~" + str(canvas.itemconfigure(item)) + "\n")
 
-			canvas.itemconfig("game",state = "hidden" )
+			canvas.itemconfig("game", state="hidden")
 
 			if pausestate:
 
-				resume_button =  Button(window, text="Resume", font = ("Impact", 50), command = game_loop )
-				mainmenu_button =  Button(window, text="Main Menu", font = ("Impact", 50), command = saveonreturn)
+				resume_button =  Button(window, text="Resume", font=("Impact", 50), command=game_loop )
+				mainmenu_button =  Button(window, text="Main Menu", font=("Impact", 50), command=saveonreturn)
 
 				canvas.create_window(windowlength/2,300, anchor=CENTER, window=resume_button, tags=("fg", "pausebutton"))
 				canvas.create_window(windowlength/2,500, anchor=CENTER, window=mainmenu_button, tags=("fg", "pausebutton"))
 
 			elif bossstate:
 
-				bosskey_label = Label(window, image=bosskey_image, tags=("fg", "pausebutton"))
+				resume_button =  Button(window, text="Resume", font=("Impact", 15), command=game_loop )
+
+				canvas.create_image(0,0, anchor=NW, image=bosskey_image, tags=("fg", "pausebutton"))
+				canvas.create_window(0, 1017, anchor=SW, window=resume_button, tags=("fg", "pausebutton"))
 
 			pausestate = False
 			bossstate = False
@@ -716,7 +725,7 @@ window.geometry(str(windowlength)+"x"+str(windowheight))
 canvas = Canvas(window, width=windowlength, height=windowheight, bg="blue")
 
 background_image = PhotoImage(file="Assets/bkgd_0.png")
-canvas.create_image(0,0, anchor=NW, image=background_image)
+canvas.create_image(0,0, anchor=NW, image=background_image, tag="bg")
 
 canvas.pack()
 
@@ -726,7 +735,7 @@ title_image = PhotoImage(file="Assets/placeholder.png")
 settingsTitle_image = PhotoImage(file="Assets/settings.png")
 controlsTitle_image = PhotoImage(file="Assets/controls.png")
 about_image = PhotoImage(file="Assets/placeholder.png")
-
+bosskey_image = PhotoImage(file="Assets/excel-data-1.png")
 
 #Player Ship 
 ship_image = PhotoImage(file="Assets/aship1.png")
