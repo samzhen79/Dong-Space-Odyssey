@@ -37,7 +37,7 @@ class Menu:
 
 		elif menutype == "chooseship":
 
-			ship = canvas.create_image(self.windowlength / 2, 440, image=ship_image, tags="fg")
+			ship = canvas.create_image(self.windowlength / 2, 440, image=aship1_image, tags="fg")
 
 			choose_button = Button(window, text="Choose", font=("Impact", 50),
 								   command=lambda menutype="difficulty": self.createmenu(menutype))
@@ -201,6 +201,7 @@ class Menu:
 
 		window.bind("<Key>", change)
 		
+
 class Game:
 
 	def __init__(self, windowlength, windowheight, difficulty, ship):
@@ -240,9 +241,11 @@ class Game:
 		self.gettags = canvas.gettags
 		self.delete = canvas.delete
 		self.sqrt = math.sqrt
-		self.sin = math.sin
-		self.cos = math.cos
-		self.pi = math.pi
+		self.circlesin = []
+		self.circlecos = []
+		for i in range(8):
+			self.circlesin.append(round(math.sin(math.pi * (i / 4)), 2))
+			self.circlecos.append(round(math.cos(math.pi * (i / 4)), 2))
 
 	# Start New or Saved Game
 	def newgame(self):  # New Game
@@ -251,7 +254,8 @@ class Game:
 
 		self.hitbox = canvas.create_oval(windowlength / 2 - 11, windowheight + 116, windowlength / 2 + 12,
 										 windowheight + 116 + 27, tags=("fg", "ship", "game"))
-		canvas.create_image(windowlength / 2, windowheight, anchor=N, image=ship_image,
+
+		canvas.create_image(windowlength / 2, windowheight, anchor=N, image=aship1_image,
 							tags=("fg", "game", "ship", "shipbody", "gameimage"))
 
 		# Neat little for loop here to have the ship enter the scene with a simple animation
@@ -277,8 +281,6 @@ class Game:
 	def loadgame(self):  # Load saved game, if no saved game available then starts a new game
 
 		canvas.delete("fg")
-
-		print(os.path.getsize("savestate.txt"))
 
 		if os.path.getsize("savestate.txt") == 0:  # If no saved game then start new game
 
@@ -555,6 +557,8 @@ class Game:
 		canvas.coords(self.healthbarfg, 0, self.windowheight - 10, self.windowlength * (self.shipstats["health"] / 100),
 					  self.windowheight - 10)  # Assuming max health is 100
 
+
+
 		# Player Movement
 		x, y = 0, 0
 
@@ -579,15 +583,113 @@ class Game:
 
 		self.move("ship", round(x), round(y))
 
+
 		# Player Shooting
 		if self.shoot:
 
-			if not (self.attackinterval % 10):  # % x indicates fire rate
+			shiplevel = self.shipstats["level"]
+			if shiplevel == 1:
 
-				self.createimage(x0 + 90, y0 + 180, image=playerlaserstraight_image,
-								 tag=("fg", "playerbullet", "game", "gameimage"))
-				self.createimage(x1 - 90, y0 + 180, image=playerlaserstraight_image,
-								 tag=("fg", "playerbullet", "game", "gameimage"))
+				if not(self.attackinterval % 10):  # % x indicates fire rate
+
+					#Single side lasers
+					self.createimage(x0 + 90, y0 + 180, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 90, y0 + 180, image=playerlaserstraight_image,
+									 tag=("fg", "playerbullet", "game", "gameimage"))
+
+			elif shiplevel == 2:
+
+				if not(self.attackinterval % 10):
+
+					#Double side lasers
+					self.createimage(x0 + 90, y0 + 180, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x0 + 90, y0 + 130, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 90, y0 + 180, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 90, y0 + 130, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+
+			elif shiplevel == 3:
+
+				if not(self.attackinterval % 10):
+
+					#Double side lasers
+					self.createimage(x0 + 70, y0 + 160, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x0 + 70, y0 + 110, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 70, y0 + 160, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 70, y0 + 110, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+
+					#Single middle laser
+					self.createimage((x0+x1)/2, y0 + 90, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+
+			elif shiplevel == 4:
+
+				if not(self.attackinterval % 10):
+
+					#Double side lasers
+					self.createimage(x0 + 70, y0 + 160, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x0 + 70, y0 + 110, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 70, y0 + 160, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 70, y0 + 110, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+
+					#Single middle laser
+					self.createimage((x0+x1)/2, y0 + 90, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+
+				if not(self.attackinterval % 30):
+
+					#Single side round laser
+					self.createimage((x0+x1)/2 + 30, y0 + 130, image=playerlaserround_image,
+									 tag=("fg", "playerbulletround", "playerbullet", "game", "gameimage"))
+					self.createimage((x0+x1)/2 - 30, y0 + 130, image=playerlaserround_image,
+									 tag=("fg", "playerbulletround", "playerbullet", "game", "gameimage"))
+			elif shiplevel == 5:
+
+				if not(self.attackinterval % 10):
+
+					#Double side Laser #1
+					self.createimage(x0 + 70, y0 + 160, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x0 + 70, y0 + 110, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 70, y0 + 160, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 70, y0 + 110, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+
+					#Double side laser #2
+					self.createimage(x0 + 45, y0 + 160, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x0 + 45, y0 + 110, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 45, y0 + 160, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+					self.createimage(x1 - 45, y0 + 110, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+
+					#Single middle laser
+					self.createimage((x0+x1)/2, y0 + 90, image=playerlaserstraight_image,
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
+
+				if not(self.attackinterval % 30):
+
+					#Single side round laser
+					self.createimage((x0+x1)/2 + 30, y0 + 140, image=playerlaserround_image,
+									 tag=("fg", "playerbulletround", "playerbullet", "game", "gameimage"))
+					self.createimage((x0+x1)/2 - 30, y0 + 140, image=playerlaserround_image,
+									 tag=("fg", "playerbulletround", "playerbullet", "game", "gameimage"))	
 
 			self.attackinterval += 1
 
@@ -596,11 +698,8 @@ class Game:
 			if (self.attackinterval % 10) != 0:
 				self.attackinterval += 1
 
-		# For creating round bullets on higher ship levels
-		# 	createimage(x1,y1, image = playerlaserround_image, tag = ("fg","playerbullet"))
-
-		self.move("playerbullet", 0, -30)
-		# move("round", 0 , -150)
+		self.move("playerbulletstraight", 0, -30)
+		self.move("playerbulletround", 0 , -15)
 
 		# Enemy
 		for enemy in self.enemylist:
@@ -681,11 +780,19 @@ class Game:
 			# Enemy Collisions and Damage
 			for collision in canvas.find_overlapping(enemyx0, enemyy0, enemyx1, enemyy1):
 
-				if "playerbullet" in self.gettags(collision):
+				tags = self.gettags(collision)
+
+				if "playerbullet" in tags:
 
 					self.delete(collision)
 
-					enemystats["health"] -= 10 * self.shipstats["damagemultiplier"]
+					if "playerbulletround" in tags:
+
+						enemystats["health"] -= 20 * self.shipstats["damagemultiplier"]
+
+					else:
+
+						enemystats["health"] -= 10 * self.shipstats["damagemultiplier"]
 
 					if enemystats["health"] <= 0:
 
@@ -699,7 +806,7 @@ class Game:
 							pass
 
 		# Enemy Bullet Movement
-		self.move("enemybulletstraight", 0, 10)
+		self.move("enemybulletstraight", 0, 8)
 
 		self.move("enemybulletspread", 0, 5)
 		for bullet in self.enemybulletspreadlist:  # Loop to spawn radiating bullets around spread type bullets
@@ -715,14 +822,14 @@ class Game:
 				append = self.enemybulletspeciallist.append
 
 				for i in range(8):
-					movex = dist * self.sin(self.pi * (i / 4))
-					movey = dist * self.cos(self.pi * (i / 4))
+					movex = self.circlesin[i]*dist
+					movey = self.circlecos[i]*dist
 					bulletcreate = self.createimage(bulletx + movex, bullety + movey, anchor=N,
 													image=enemylaserround_image,
 													tag=(
 														"fg", "enemybullet", "enemybulletspecial", "game", "gameimage"))
 
-					append({"id": bulletcreate, "x": round(movex, 2), "y": round(movey, 2)})
+					append({"id": bulletcreate, "x": movex, "y": movey})
 
 			bullet["counter"] += 1
 
@@ -911,7 +1018,11 @@ about_image = PhotoImage(file="Assets/placeholder.png")
 bosskey_image = PhotoImage(file="Assets/excel-data-1.png")
 
 # Player Ship
-ship_image = PhotoImage(file="Assets/aship1.png")
+aship1_image = PhotoImage(file="Assets/aship1.png")
+aship2_image = PhotoImage(file="Assets/aship2.png")
+aship3_image = PhotoImage(file="Assets/aship3.png")
+aship4_image = PhotoImage(file="Assets/aship4.png")
+aship5_image = PhotoImage(file="Assets/aship5.png")
 # Player Bullets
 playerlaserstraight_image = PhotoImage(file="Assets/playerlaserstraight.png")
 playerlaserround_image = PhotoImage(file="Assets/playerlaserround.png")
