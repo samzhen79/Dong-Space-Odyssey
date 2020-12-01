@@ -1,0 +1,4 @@
+{"name": "name", "score": 1000}
+{"name": "name2", "score": 2000}
+{"name": "name3", "score": 500}
+{"name": "sans", "score": 3000}
