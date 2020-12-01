@@ -430,7 +430,7 @@ class Game:
 				"movement": "followx",
 				"stopx": stopx,
 				"stopy": stopy,
-				"speed": 4,
+				"speed": 1,
 				"damage": 10,
 				"points": 1000
 			}
@@ -503,7 +503,7 @@ class Game:
 									  tag=("fg", "enemybullet", "enemybulletspecial", "game", "gameimage"))
 
 			# Maths to work out which direction the bullet needs to move in to move towards the player position
-			bulletx0, bullety0, bulletx1, bullety1 = self.bbox(bullet["id"])
+			bulletx0, bullety0, bulletx1, bullety1 = self.bbox(bullet)
 			bulletx = (bulletx0 + bulletx1) / 2
 			bullety = (bullety0 + bullety1) / 2
 			directDist = self.sqrt(((shipx - bulletx) ** 2) + ((shipy - bullety) ** 2))
@@ -511,7 +511,7 @@ class Game:
 			movey = (shipy - bullety) / directDist
 
 			# Need to keep track of which bullet is moving in what direction
-			self.enemybulletspeciallist.append({"id": bullet, "x": round(movex * 10, 2), "y": round(movey * 10, 2)})
+			self.enemybulletspeciallist.append({"id": bullet, "x": round(movex * 5, 2), "y": round(movey * 5, 2)})
 
 		elif type == "radiate":  # Round laser that radiates more round lasers
 
@@ -596,7 +596,7 @@ class Game:
 					self.createimage(x0 + 90, y0 + 180, image=playerlaserstraight_image,
 									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
 					self.createimage(x1 - 90, y0 + 180, image=playerlaserstraight_image,
-									 tag=("fg", "playerbullet", "game", "gameimage"))
+									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
 
 			elif shiplevel == 2:
 
@@ -885,18 +885,18 @@ class Game:
 
 		# Stages
 		if self.gametime == 20:
-			self.enemy_spawn(5, 225, 200, "stop", 225, 200)
-			self.enemy_spawn(3, 275, 200, "stop", 275, 200)
+			self.enemy_spawn(1, 225, 200, "stop", 225, 200)
+			self.enemy_spawn(2, 275, 200, "stop", 275, 200)
 			self.enemy_spawn(3, 325, 200, "stop", 325, 200)
-			self.enemy_spawn(3, 375, 200, "stop", 375, 200)
-			self.enemy_spawn(3, 425, 200, "stop", 425, 200)
-			self.enemy_spawn(3, 475, 200, "stop", 475, 200)
-			self.enemy_spawn(3, 525, 200, "stop", 525, 200)
-			self.enemy_spawn(3, 575, 200, "stop", 575, 200)
-			self.enemy_spawn(3, 625, 200, "stop", 625, 200)
-			self.enemy_spawn(3, 675, 200, "stop", 675, 200)
-			self.enemy_spawn(3, 725, 200, "stop", 725, 200)
-		# self.enemylist.append(enemy_spawn(1, 625, 0, "forward"))
+			self.enemy_spawn(4, 375, 200, "stop", 375, 200)
+			self.enemy_spawn(5, 425, 200, "stop", 425, 200)
+		# 	self.enemy_spawn(3, 475, 200, "stop", 475, 200)
+		# 	self.enemy_spawn(3, 525, 200, "stop", 525, 200)
+		# 	self.enemy_spawn(3, 575, 200, "stop", 575, 200)
+		# 	self.enemy_spawn(3, 625, 200, "stop", 625, 200)
+		# 	self.enemy_spawn(3, 675, 200, "stop", 675, 200)
+		# 	self.enemy_spawn(3, 725, 200, "stop", 725, 200)
+		# # self.enemylist.append(enemy_spawn(1, 625, 0, "forward"))
 
 		# Pausing
 		if self.pausestate or self.bossstate:
