@@ -1,4 +1,7 @@
 #Window size is 900x1017, Game was built on 3440x1440, Supports 1920x1080
+#May take a few seconds to load
+#Type "cheats" while in game to access the cheats menu
+
 #Credits:
 #Background - Parallax Space Scene by LuminousDragonGames (https://opengameart.org/content/parallax-space-scene-seamlessly-scrolls-too)
 #Player Ship - Modular Ships by surt (https://opengameart.org/content/modular-ships)
@@ -10,7 +13,7 @@ import math
 import os
 import time
 from configparser import ConfigParser
-from tkinter import Tk, PhotoImage, Label, Button, Entry, Canvas, CENTER, N, NE, NW, SW
+from tkinter import Tk, PhotoImage, Label, Button, Entry, Canvas, CENTER, N, NE, NW, SW, S
 
 class Menu:
 
@@ -76,6 +79,9 @@ class Menu:
 
 		elif menutype == "settings":
 
+			settingsTitle_image = PhotoImage(file="Assets/Settings.png")
+			controlsTitle_image = PhotoImage(file="Assets/controls.png")
+
 			changeshoot_button = Button(window, text="Shoot key is: \n' " + self.settings["CONTROLS"][
 				"Shoot"] + " '\nPress to change key.", font=("Impact", 18),
 										command=lambda control="Shoot", button=0: self.changekey(control, button))
@@ -119,6 +125,9 @@ class Menu:
 
 		elif menutype == "howtoplay":
 
+			howtoplayTitle_image = PhotoImage(file="Assets/howtoplaytitle.png")
+			howtoplay_image = PhotoImage(file="Assets/howtoplaytext.png")
+
 			canvas.create_image(self.windowlength / 2, 100, anchor=CENTER, image=howtoplayTitle_image,
 													  tags="fg")
 			canvas.create_image(self.windowlength / 2, 200, anchor=N, image=howtoplay_image,
@@ -128,6 +137,8 @@ class Menu:
 
 		elif menutype == "about":
 			
+			aboutTitle_image = PhotoImage(file="Assets/About.png")
+			about_image = PhotoImage(file="Assets/abouttext.png")
 
 			canvas.create_image(self.windowlength / 2, 100, anchor=CENTER, image=aboutTitle_image,
 													  tags="fg")
@@ -137,6 +148,8 @@ class Menu:
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
 		elif menutype == "leaderboard":
+
+			leaderboardTitle_image = PhotoImage(file="Assets/leaderboard.png")
 
 			file = open("leaderboard.txt", "r")
 			leaderboard_read = file.read().split("\n")
@@ -234,7 +247,7 @@ class Game:
 		self.ship = ship
 		self.maxvelocity = 8
 		self.velx, self.vely, self.gametime, self.attackinterval, self.expcounter, self.score = 0, 0, 0, 0, 0, 0
-		self.shoot, self.pausestate, self.bossstate = False, False, False
+		self.shoot, self.pausestate, self.bossstate, self.cheatstate = False, False, False, False
 		self.shipstats = {
 			"type": 1,
 			"health": 100,
@@ -297,6 +310,7 @@ class Game:
 		# Start game loop
 		canvas.bind_all("<KeyPress>", self.key_press)
 		canvas.bind_all("<KeyRelease>", self.key_release)
+		canvas.bind_all("cheats", self.cheatmenu)
 		self.game_loop()
 
 	def loadgame(self):  # Load saved game, if no saved game available then starts a new game
@@ -382,6 +396,7 @@ class Game:
 			# Player Movement and shooting
 			canvas.bind_all("<KeyPress>", self.key_press)
 			canvas.bind_all("<KeyRelease>", self.key_release)
+			canvas.bind_all("cheats", self.cheatmenu)
 
 			# Start game loop
 			self.game_loop()
@@ -425,6 +440,24 @@ class Game:
 		# Shooting
 		elif event.keysym.upper() == self.shootkey:
 			self.shoot = False
+
+	def cheatmenu(self, event):
+		"""When the sequence of characters "cheats" is pressed, this sets the cheatstate to true so the menu will come up"""
+
+		self.cheatstate = True
+
+	def heal_cheat(self):
+		"""Heals the player to full HP"""
+
+		self.shipstats["health"] = 100
+		self.game_loop()
+
+	def level_cheat(self):
+		"""Player becomes a level 5 ship"""
+
+		self.shipstats["level"] = 5
+		canvas.itemconfig("shipbody", image=shipA[5])
+		self.game_loop()
 
 	# Enemy spawn  
 	def enemy_spawn(self, type, spawnx, spawny, movement=0, stopx=0, stopy=0, healthmultiplier=1):
@@ -532,7 +565,7 @@ class Game:
 			movey = (shipy - bullety) / directDist
 
 			# Need to keep track of which bullet is moving in what direction
-			self.enemybulletspeciallist.append({"id": bullet, "x": round(movex * 5), "y": round(movey * 5)})
+			self.enemybulletspeciallist.append({"id": bullet, "x": round(movex * 8), "y": round(movey * 8)})
 
 		elif type == "radiate":  # Round laser that radiates more round lasers
 
@@ -578,6 +611,18 @@ class Game:
 		canvas.coords(self.healthbarfg, 0, self.windowheight - 10, self.windowlength * (self.shipstats["health"] / 100),
 					  self.windowheight - 10)  # Assuming max health is 100
 
+		#Background Scrolling
+		self.move("bg0", 0, 2)
+		self.move("bg2", 0, 4)
+		self.move("bg3", 0, 6)
+
+		if canvas.coords("bg0")[1] >= 3000:
+			canvas.move("bg0", 0, -2000)
+		if canvas.coords("bg2")[1] >= 3000:
+			canvas.move("bg2", 0, -2000)
+		if canvas.coords("bg3")[1] >= 3000:
+			canvas.move("bg3", 0, -2000)
+
 		# Player Movement
 		x, y = 0, 0
 
@@ -614,17 +659,17 @@ class Game:
 				if not(self.attackinterval % 10):  # % x indicates fire rate
 
 					#Single side lasers
-					self.createimage(x0 + 90, y0 + 180, image=playerlaserstraight_image,
+					self.createimage(x0 + 90, y0 + 150, image=playerlaserstraight_image,
 									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
-					self.createimage(x1 - 90, y0 + 180, image=playerlaserstraight_image,
+					self.createimage(x1 - 90, y0 + 150, image=playerlaserstraight_image,
 									 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
 
 					if shiplevel == 2:
 
 						#Lasers are now doubled
-						self.createimage(x0 + 90, y0 + 130, image=playerlaserstraight_image,
+						self.createimage(x0 + 90, y0 + 100, image=playerlaserstraight_image,
 										 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
-						self.createimage(x1 - 90, y0 + 130, image=playerlaserstraight_image,
+						self.createimage(x1 - 90, y0 + 100, image=playerlaserstraight_image,
 										 tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
 
 
@@ -896,7 +941,7 @@ class Game:
 				self.delete(item)
 
 		# Pausing
-		if self.pausestate or self.bossstate:
+		if self.pausestate or self.bossstate or self.cheatstate:
 
 			# Game Save
 			self.savestate = open("savestate.txt", "w")
@@ -931,6 +976,17 @@ class Game:
 				self.createimage(0, 0, anchor=NW, image=bosskey_image, tags=("fg", "pausebutton"))
 				canvas.create_window(0, 1017, anchor=SW, window=resume_button, tags=("fg", "pausebutton"))
 
+			elif self.cheatstate:
+
+				resume_button = Button(window, text="Resume", font=("Impact", 30), command=self.game_loop)
+				heal_button = Button(window, text="Heal to full health", font=("Impact", 30), command=self.heal_cheat)
+				quicklevel_button = Button(window, text="Jump to level 5 ship", font=("Impact", 30), command=self.level_cheat)
+
+				canvas.create_window(450, 200, window=heal_button, tags=("fg", "pausebutton"))
+				canvas.create_window(450, 400, window=quicklevel_button, tags=("fg", "pausebutton"))
+				canvas.create_window(0, 1017, anchor=SW, window=resume_button, tags=("fg", "pausebutton"))
+
+			self.cheatstate	= False
 			self.pausestate = False
 			self.bossstate = False
 
@@ -1200,12 +1256,24 @@ class Game:
 			enemy_spawn(5, 225, -100, "stop", 225, 250, 1.5)
 			enemy_spawn(5, 625, -100, "stop", 625, 250, 1.5)
 
-		elif gametime >= 18500 and gametime <= 20000 and self.enemylist == None: #Periodic type 4 in the center
+		elif gametime >= 18500 and gametime < 21000: #Periodic type 4 in the center
 
-			if not(gametime % 200):
+			if not(gametime % 500):
 
 				enemy_spawn(4, 350, -100, "stop", 350, 150, 4)
-				enemy_spawn(4, 550, -100, "stop", 550, 150, 4)				
+				enemy_spawn(4, 550, -100, "stop", 550, 150, 4)
+
+		elif gametime == 22000:
+
+			enemy_spawn(1, 450, -100, "stop", 225, 200, 1.5)
+			enemy_spawn(1, 450, -100, "stop", 675, 200, 1.5)
+			enemy_spawn(1, 450, -100, "stop", 225, 400, 1.5)
+			enemy_spawn(1, 450, -100, "stop", 675, 400, 1.5)
+
+			enemy_spawn(1, 450, -100, "stop", 350, 300)
+			enemy_spawn(1, 450, -100, "stop", 550, 300)
+			enemy_spawn(1, -100, 100, "right")
+			enemy_spawn(1, 1000, 150, "left")
 
 		self.game_loop()
 
@@ -1217,22 +1285,18 @@ window.title("Dong Space Odyssey")
 
 canvas = Canvas(window, width=windowlength, height=windowheight, bg="blue")
 
-background_image = PhotoImage(file="Assets/bkgd_0.png")
-canvas.create_image(0, 0, anchor=NW, image=background_image, tag="bg")
+background0_image = PhotoImage(file="Assets/bkgd_0.png")
+background2_image = PhotoImage(file="Assets/bkgd_2.png")
+background3_image = PhotoImage(file="Assets/bkgd_3.png")
+
+canvas.create_image(0, windowheight, anchor=SW, image=background0_image, tag=("bg","bg0"))
+canvas.create_image(0, windowheight, anchor=SW, image=background2_image, tag=("bg","bg2"))
+canvas.create_image(0, windowheight, anchor=SW, image=background3_image, tag=("bg","bg3"))
 
 canvas.pack()
 
-# Menu Titles
 title_image = PhotoImage(file="Assets/Title.png")
-settingsTitle_image = PhotoImage(file="Assets/Settings.png")
-howtoplayTitle_image = PhotoImage(file="Assets/howtoplaytitle.png")
-aboutTitle_image = PhotoImage(file="Assets/About.png")
-controlsTitle_image = PhotoImage(file="Assets/controls.png")
-leaderboardTitle_image = PhotoImage(file="Assets/leaderboard.png")
 
-# Content Images
-howtoplay_image = PhotoImage(file="Assets/howtoplaytext.png")
-about_image = PhotoImage(file="Assets/abouttext.png")
 bosskey_image = PhotoImage(file="Assets/excel-data-1.png")
 
 # Player Ship
