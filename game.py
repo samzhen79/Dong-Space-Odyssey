@@ -1,10 +1,16 @@
+#Window size is 900x1017, Game was built on 3440x1440, Supports 1920x1080
+#Credits:
+#Background - Parallax Space Scene by LuminousDragonGames (https://opengameart.org/content/parallax-space-scene-seamlessly-scrolls-too)
+#Player Ship - Modular Ships by surt (https://opengameart.org/content/modular-ships)
+#Enemy Ships - Retro Spaceships by Jerom (https://opengameart.org/content/retro-spaceships)
+#Bullets - Lasers and Beams by Rawdanitsu (https://opengameart.org/content/lasers-and-beams)
+
 import json
 import math
 import os
 import time
 from configparser import ConfigParser
 from tkinter import Tk, PhotoImage, Label, Button, Entry, Canvas, CENTER, N, NE, NW, SW
-
 
 class Menu:
 
@@ -46,7 +52,6 @@ class Menu:
 			back_button.config(command=lambda menutype="play": self.createmenu(menutype))
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
-
 		elif menutype == "difficulty":
 
 			easy_button = Button(window, text="Easy", font=("Impact", 50),
@@ -68,7 +73,6 @@ class Menu:
 
 			back_button.config(command=lambda menutype="chooseship": self.createmenu(menutype))
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
-
 
 		elif menutype == "settings":
 
@@ -113,10 +117,21 @@ class Menu:
 
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
-		elif menutype == "about":
+		elif menutype == "howtoplay":
 
-			about_label = Label(window, image=about_image)
-			about_canvaswindow = canvas.create_window(self.windowlength / 2, 800, anchor=CENTER, window=about_label,
+			canvas.create_image(self.windowlength / 2, 100, anchor=CENTER, image=howtoplayTitle_image,
+													  tags="fg")
+			canvas.create_image(self.windowlength / 2, 200, anchor=N, image=howtoplay_image,
+													  tags="fg")
+
+			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
+
+		elif menutype == "about":
+			
+
+			canvas.create_image(self.windowlength / 2, 100, anchor=CENTER, image=aboutTitle_image,
+													  tags="fg")
+			canvas.create_image(self.windowlength / 2, 200, anchor=N, image=about_image,
 													  tags="fg")
 
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
@@ -145,17 +160,17 @@ class Menu:
 				i += 1
 				leaderboard_text += (str(i) + ". " + item["name"] + ": " + str(item["score"]) + "\n")
 
-			leaderboard_label = Label(window, text=leaderboard_text, font=("Impact", 15))
+			leaderboard_label = Label(window, text=leaderboard_text, font=("Impact", 18))
 
 			canvas.create_image(self.windowlength/2, 0+100, image=leaderboardTitle_image, tags=("fg"))
-			canvas.create_window(self.windowlength/2, 0+200, anchor=N, window=leaderboard_label, tags=("fg"))
+			canvas.create_window(self.windowlength/2, 0+150, anchor=N, window=leaderboard_label, tags=("fg"))
 
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
 
 		else:  # This is the default menutype i.e. the main menu
 
-			title_label = Label(window, image=title_image)
+
 			play_button = Button(window, text="Play", font=("Impact", 50), width=8, height=1,
 								 command=lambda menutype="play": self.createmenu(menutype))
 			settings_button = Button(window, text="Settings", font=("Impact", 30), width=10, height=1,
@@ -168,7 +183,7 @@ class Menu:
 								  command=lambda menutype="howtoplay": self.createmenu(menutype))
 			exit_button = Button(window, text="Exit", font=("Impact", 30), command=lambda: window.destroy())
 
-			canvas.create_window(self.windowlength / 2, 100, anchor=CENTER, window=title_label, tags="fg")
+			canvas.create_image(self.windowlength / 2, 150, anchor=CENTER, image=title_image, tags="fg")
 			canvas.create_window(self.windowlength / 2, 350, anchor=CENTER, window=play_button, tags="fg")
 			canvas.create_window((self.windowlength / 4)+100, 500, anchor=CENTER, window=leaderboard_button, tags="fg")			
 			canvas.create_window(((3*self.windowlength) / 4)-100, 500, anchor=CENTER, window=settings_button, tags="fg")
@@ -698,7 +713,7 @@ class Game:
 				enemyx = (enemyx0 + enemyx1) / 2
 				enemyy = (enemyy0 + enemyy1) / 2
 				directDist = self.sqrt(((enemystats["stopx"] - enemyx) ** 2) + ((enemystats["stopy"] - enemyy) ** 2))
-				if directDist > 2:
+				if directDist > 5:
 					movex = (enemystats["stopx"] - enemyx) / directDist
 					movey = (enemystats["stopy"] - enemyy) / directDist
 					self.move(enemyid, movex * enemyspeed * 2, movey * enemyspeed * 2)
@@ -738,9 +753,18 @@ class Game:
 
 			elif enemytype == "boss":  # A combination of the shooting types
 
-				if not (enemyattackcounter % 150):  # Cross Bullet
+				if not(enemyattackcounter % 300):
+					self.enemybullet("simple", enemyx0 + 420, enemyy1)
 
-					self.enemybullet("radiate", enemyx0 + 97, enemyy1)
+				if not(enemyattackcounter % 200):
+					self.enemybullet("radiate", enemyx0 + 100, enemyy1)
+					self.enemybullet("radiate", enemyx1 - 100, enemyy1)
+
+				if not(enemyattackcounter % 100):
+					shipx = (x0 + x1) / 2
+					shipy = (y0 + y1) / 2
+					self.enemybullet("special", enemyx0 + 200, enemyy1, shipx, shipy)
+					self.enemybullet("special", enemyx1 - 200, enemyy1, shipx, shipy)
 
 			# Enemy Collisions and Damage
 			for collision in canvas.find_overlapping(enemyx0, enemyy0, enemyx1, enemyy1):
@@ -927,6 +951,7 @@ class Game:
 		yourname_label = Label(window, text="Your Name: ", font=("Impact", 20))
 		self.name_entry = Entry(window, font=("Impact", 20))
 		nameadd_button = Button(window, text="Add", font=("Impact", 20), command= self.add)
+		back_button = Button(window, text="Back", font=("Impact", 50), command=Menu(self.windowlength, self.windowheight).createmenu)
 
 		file = open("leaderboard.txt", "r")
 		leaderboard_read = file.read().split("\n")
@@ -942,11 +967,9 @@ class Game:
 
 		leaderboard_list.sort(reverse=True, key=getscore)
 
-		leaderboard_list = leaderboard_list[:25] #Only get the top 25 items
-
 		leaderboard_text = ""
 		i = 0
-		for item in leaderboard_list[:24]:
+		for item in leaderboard_list[:25]:
 			i += 1
 			leaderboard_text += (str(i) + ". " + item["name"] + ": " + str(item["score"]) + "\n")
 
@@ -956,8 +979,10 @@ class Game:
 		canvas.create_window((self.windowlength/2)-210, 0+175, window=yourname_label, tags=("fg"))
 		canvas.create_window(self.windowlength/2, 0+175, window=self.name_entry, tags=("fg"))
 		canvas.create_window((self.windowlength/2)+180, 0+175, window=nameadd_button, tags=("fg"))
-		canvas.create_image(self.windowlength/2, 0+225, image=leaderboardTitle_image, tags=("fg"))
+		canvas.create_image(self.windowlength/2, 0+250, image=leaderboardTitle_image, tags=("fg"))
 		canvas.create_window(self.windowlength/2, 0+300, anchor=N, window=leaderboard_label, tags=("fg"))
+
+		canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
 	def add(self):
 		"""Adds the name given and score to the leaderboard file"""
@@ -1188,6 +1213,7 @@ window = Tk()
 windowlength = 900
 windowheight = 1017
 window.geometry(str(windowlength) + "x" + str(windowheight))
+window.title("Dong Space Odyssey")
 
 canvas = Canvas(window, width=windowlength, height=windowheight, bg="blue")
 
@@ -1197,13 +1223,16 @@ canvas.create_image(0, 0, anchor=NW, image=background_image, tag="bg")
 canvas.pack()
 
 # Menu Titles
-title_image = PhotoImage(file="Assets/placeholder.png")
-settingsTitle_image = PhotoImage(file="Assets/settings.png")
+title_image = PhotoImage(file="Assets/Title.png")
+settingsTitle_image = PhotoImage(file="Assets/Settings.png")
+howtoplayTitle_image = PhotoImage(file="Assets/howtoplaytitle.png")
+aboutTitle_image = PhotoImage(file="Assets/About.png")
 controlsTitle_image = PhotoImage(file="Assets/controls.png")
 leaderboardTitle_image = PhotoImage(file="Assets/leaderboard.png")
 
 # Content Images
-about_image = PhotoImage(file="Assets/placeholder.png")
+howtoplay_image = PhotoImage(file="Assets/howtoplaytext.png")
+about_image = PhotoImage(file="Assets/abouttext.png")
 bosskey_image = PhotoImage(file="Assets/excel-data-1.png")
 
 # Player Ship
