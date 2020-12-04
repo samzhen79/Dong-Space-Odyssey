@@ -9,7 +9,6 @@
 #Enemy Ships - Retro Spaceships by Jerom (https://opengameart.org/content/retro-spaceships)
 #Bullets - Lasers and Beams by Rawdanitsu (https://opengameart.org/content/lasers-and-beams)
 
-import wave
 import json
 import math
 import os
@@ -227,7 +226,7 @@ class Game:
 
 		self.windowlength = windowlength
 		self.windowheight = windowheight
-
+		self.difficulty = difficulty
 		if difficulty == "easy":
 			self.damagemodifier = 0.5
 			self.shipstats["damagemultiplier"] = 1.2
@@ -327,13 +326,13 @@ class Game:
 			self.enemybulletspeciallist = json.loads(information[4])
 			self.enemybulletspreadlist = json.loads(information[5])
 			self.score = int(information[6])
-			difficulty = information[7]
+			self.difficulty = information[7]
 			self.cheataccess = information[8]
 
-			if difficulty == "easy":
+			if self.difficulty == "easy":
 				self.damagemodifier = 0.5
 				self.shipstats["damagemultiplier"] = 1.2
-			elif difficulty == "hard":
+			elif self.difficulty == "hard":
 				self.damagemodifier = 2
 				self.shipstats["damagemultiplier"] = 0.8
 			else:
@@ -587,7 +586,7 @@ class Game:
 		self.savestate.write(" " + str(self.gametime) + "~" + json.dumps(self.shipstats) + "~" + str(
 			self.attackinterval) + "~" + json.dumps(self.enemylist) + "~" + json.dumps(
 			self.enemybulletspeciallist) + "~" + json.dumps(self.enemybulletspreadlist) + "~" + str(
-			self.score) + "\n")
+			self.score) + "~" + self.difficulty + "~" + str(self.cheataccess) + "\n")
 
 		for item in canvas.find_withtag(
 				"gameimage"):  # Finds every canvas item with tag "game" and saves their coordinates and configuration
@@ -965,7 +964,8 @@ class Game:
 			self.savestate.write(" " + str(self.gametime) + "~" + json.dumps(self.shipstats) + "~" + str(
 				self.attackinterval) + "~" + json.dumps(self.enemylist) + "~" + json.dumps(
 				self.enemybulletspeciallist) + "~" + json.dumps(self.enemybulletspreadlist) + "~" + str(
-				self.score) + "\n")
+				self.score) + "~" + self.difficulty + "~" + str(self.cheataccess) + "\n")
+
 			for item in canvas.find_withtag(
 					"gameimage"):  # Finds every canvas item with tag "game" and saves their coordinates and configuration
 
