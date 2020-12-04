@@ -3,4 +3,4 @@
 {"name": "name3", "score": 500}
 {"name": "sans", "score": 3000}
 {"name": "nope", "score": 11000}
-
+{"name": "Semoth", "score": 121800}

@@ -1,6 +1,7 @@
 #Window size is 900x1017, Game was built on 3440x1440, Supports 1920x1080
 #May take a few seconds to load
-#Type "cheats" while in game to access the cheats menu
+#Type "cheat" while in game to access the cheats menu
+#Built in Windows OS, should work on linux
 
 #Credits:
 #Background - Parallax Space Scene by LuminousDragonGames (https://opengameart.org/content/parallax-space-scene-seamlessly-scrolls-too)
@@ -8,6 +9,7 @@
 #Enemy Ships - Retro Spaceships by Jerom (https://opengameart.org/content/retro-spaceships)
 #Bullets - Lasers and Beams by Rawdanitsu (https://opengameart.org/content/lasers-and-beams)
 
+import wave
 import json
 import math
 import os
@@ -228,15 +230,17 @@ class Game:
 
 		if difficulty == "easy":
 			self.damagemodifier = 0.5
+			self.shipstats["damagemultiplier"] = 1.2
 		elif difficulty == "hard":
 			self.damagemodifier = 2
+			self.shipstats["damagemultiplier"] = 0.8
 		else:
 			self.damagemodifier = 1
 
 		self.ship = ship
 		self.maxvelocity = 8
 		self.velx, self.vely, self.gametime, self.attackinterval, self.expcounter, self.score = 0, 0, 0, 0, 0, 0
-		self.shoot, self.pausestate, self.bossstate, self.cheatstate = False, False, False, False
+		self.shoot, self.pausestate, self.bossstate, self.cheatstate, self.cheataccess = False, False, False, False, False
 		self.shipstats = {
 			"type": 1,
 			"health": 100,
@@ -299,7 +303,7 @@ class Game:
 		# Start game loop
 		canvas.bind_all("<KeyPress>", self.key_press)
 		canvas.bind_all("<KeyRelease>", self.key_release)
-		canvas.bind_all("cheats", self.cheatmenu)
+		canvas.bind_all("cheat", self.cheatmenu)
 		self.game_loop()
 
 	def loadgame(self):  # Load saved game, if no saved game available then starts a new game
@@ -323,6 +327,17 @@ class Game:
 			self.enemybulletspeciallist = json.loads(information[4])
 			self.enemybulletspreadlist = json.loads(information[5])
 			self.score = int(information[6])
+			difficulty = information[7]
+			self.cheataccess = information[8]
+
+			if difficulty == "easy":
+				self.damagemodifier = 0.5
+				self.shipstats["damagemultiplier"] = 1.2
+			elif difficulty == "hard":
+				self.damagemodifier = 2
+				self.shipstats["damagemultiplier"] = 0.8
+			else:
+				self.damagemodifier = 1
 
 			for object in savestateobjects[1:]:
 				# This code is needed to interpret the savestate.txt, Effectively splits the text file into the necessary parts and then cleans each part until it is useable in create_image()
@@ -439,6 +454,7 @@ class Game:
 		"""Heals the player to full HP"""
 
 		self.shipstats["health"] = 100
+		self.cheataccess = True
 		self.game_loop()
 
 	def level_cheat(self):
@@ -446,6 +462,7 @@ class Game:
 
 		self.shipstats["level"] = 5
 		canvas.itemconfig("shipbody", image=shipA[5])
+		self.cheataccess = True
 		self.game_loop()
 
 	# Enemy spawn  
@@ -475,7 +492,7 @@ class Game:
 				"stopy": stopy,
 				"speed": 2,
 				"damage": 10,
-				"points": 1000
+				"points": 1200
 			}
 
 		elif type == 3:  # Shoots a 3 shot burst
@@ -499,9 +516,9 @@ class Game:
 				"movement": movement,
 				"stopx": stopx,
 				"stopy": stopy,
-				"speed": 1,
+				"speed": 3,
 				"damage": 20,
-				"points": 1500
+				"points": 2000
 			}
 
 		elif type == 5:  # Elite type, shoots a single round bullet (cross) that itself shoots out a bunch of round bullets
@@ -514,14 +531,14 @@ class Game:
 				"stopy": stopy,
 				"speed": 1,
 				"damage": 10,
-				"points": 2500
+				"points": 5000
 			}
 
 		elif type == "boss":  # Pretty self explanatory
 			enemy = self.createimage(spawnx, spawny, image=boss1_image, tag=("fg", "enemy", "game", "gameimage"))
 			enemystats = {
 				"type": "boss",
-				"health": 5000,
+				"health": 10000,
 				"movement": movement,
 				"stopx": stopx,
 				"stopy": stopy,
@@ -540,30 +557,28 @@ class Game:
 			self.createimage(x, y, anchor=N, image=enemylaserstraight_image,
 							 tag=("fg", "enemybullet", "enemybulletstraight", "game", "gameimage"))
 
-		elif type == "special":  # Round laser that is pointed towards given player position
-
-			bullet = self.createimage(x, y, anchor=N, image=enemylaserround_image,
-									  tag=("fg", "enemybullet", "enemybulletspecial", "game", "gameimage"))
+		elif type == "special" or type == "radiate":  # Round laser that is pointed towards given player position
 
 			# Maths to work out which direction the bullet needs to move in to move towards the player position
-			bulletx0, bullety0, bulletx1, bullety1 = self.bbox(bullet)
-			bulletx = (bulletx0 + bulletx1) / 2
-			bullety = (bullety0 + bullety1) / 2
-			directDist = self.sqrt(((shipx - bulletx) ** 2) + ((shipy - bullety) ** 2))
-			movex = (shipx - bulletx) / directDist
-			movey = (shipy - bullety) / directDist
+			directDist = self.sqrt(((shipx - x) ** 2) + ((shipy - y) ** 2))
+			movex = (shipx - x) / directDist
+			movey = (shipy - y) / directDist
 
-			# Need to keep track of which bullet is moving in what direction
-			self.enemybulletspeciallist.append({"id": bullet, "x": round(movex * 8), "y": round(movey * 8)})
+			if type == "special":
 
-		elif type == "radiate":  # Round laser that radiates more round lasers
+				bullet = self.createimage(x, y, anchor=N, image=enemylaserround_image,
+							  tag=("fg", "enemybullet", "enemybulletspecial", "game", "gameimage"))
 
-			bullet = self.createimage(x, y, anchor=N, image=enemylaserroundcross_image,
-									  tag=("fg", "enemybullet", "enemybulletspread", "game", "gameimage"))
+				self.enemybulletspeciallist.append({"id": bullet, "x": round(movex * 8), "y": round(movey * 8)})
 
-			spreadcounter = 0
+			elif type == "radiate": # Radiates more round lasers, the child lasers will not move toward player position
 
-			self.enemybulletspreadlist.append({"id": bullet, "counter": spreadcounter})
+				bullet = self.createimage(x, y, anchor=N, image=enemylaserroundcross_image,
+										  tag=("fg", "enemybullet", "enemybulletspread", "game", "gameimage"))
+
+				spreadcounter = 0
+
+				self.enemybulletspreadlist.append({"id": bullet, "x": round(movex * 4), "y": round(movey * 4), "counter": spreadcounter})
 
 	# Game Saving
 	def saveonclose(self):
@@ -774,7 +789,7 @@ class Game:
 
 			elif enemytype == 4:  # Round laser shot towards the player, a bit more complex compared to other bullet types
 
-				if not (enemyattackcounter % 100):
+				if not (enemyattackcounter % 40):
 					shipx = (x0 + x1) / 2
 					shipy = (y0 + y1) / 2
 
@@ -783,22 +798,34 @@ class Game:
 			elif enemytype == 5:  # Special round bullet that radiates other round bullets
 
 				if not (enemyattackcounter % 150):
-					self.enemybullet("radiate", enemyx0 + 97, enemyy1)
+					shipx = (x0 + x1) / 2
+					shipy = (y0 + y1) / 2
+
+					self.enemybullet("radiate", enemyx0 + 97, enemyy1, shipx, shipy)
 
 			elif enemytype == "boss":  # A combination of the shooting types
 
-				if not(enemyattackcounter % 300):
+				shipx = (x0 + x1) / 2
+				shipy = (y0 + y1) / 2
+
+				if not(enemyattackcounter % 70):
+
 					self.enemybullet("simple", enemyx0 + 420, enemyy1)
 
 				if not(enemyattackcounter % 200):
-					self.enemybullet("radiate", enemyx0 + 100, enemyy1)
-					self.enemybullet("radiate", enemyx1 - 100, enemyy1)
 
-				if not(enemyattackcounter % 100):
-					shipx = (x0 + x1) / 2
-					shipy = (y0 + y1) / 2
+					self.enemybullet("radiate", enemyx0 + 100, enemyy1, shipx, shipy)
+					self.enemybullet("radiate", enemyx1 - 100, enemyy1, shipx, shipy)
+
+				if not(enemyattackcounter % 40):
+
 					self.enemybullet("special", enemyx0 + 200, enemyy1, shipx, shipy)
 					self.enemybullet("special", enemyx1 - 200, enemyy1, shipx, shipy)
+
+				if not(enemyattackcounter % 60):
+
+					self.enemybullet("special", enemyx0 + 300, enemyy1, shipx, shipy)
+					self.enemybullet("special", enemyx1 - 300, enemyy1, shipx, shipy)
 
 			# Enemy Collisions and Damage
 			for collision in canvas.find_overlapping(enemyx0, enemyy0, enemyx1, enemyy1):
@@ -843,10 +870,10 @@ class Game:
 		# Enemy Bullet Movement
 		self.move("enemybulletstraight", 0, 8)
 
-		self.move("enemybulletspread", 0, 5)
 		for bullet in self.enemybulletspreadlist:  # Loop to spawn radiating bullets around spread type bullets
 			bulletcounter = bullet["counter"]
-			if not (bulletcounter % 50) and (bulletcounter != 0):
+			self.move(bullet["id"], bullet["x"], bullet["y"])
+			if not (bulletcounter % 60) and (bulletcounter != 0):
 
 				bulletx0, bullety0, bulletx1, bullety1 = self.bbox(bullet["id"])
 				bulletx = (bulletx0 + bulletx1) / 2
@@ -990,9 +1017,22 @@ class Game:
 
 		window.protocol("WM_DELETE_WINDOW", window.destroy)
 
-		self.score = self.score*self.damagemodifier #Higher difficulty gives more points
+		nohit = 0
+		if self.shipstats["health"] == 100: #Bonus 50,000 points for not getting hit
+
+			nohit = 50000
+			self.score += 50000
+
+		self.score = self.score*self.damagemodifier #Higher difficulty gives more points, lower difficulty gives less points
+
+		cheatmodifier = 1
+		if self.cheataccess == True:	#Using cheats will half the score
+
+			cheatmodifier = 0.5
+			self.score = self.score * 0.5
 
 		yourscore_label = Label(window, text="Your Score: " + str(self.score).zfill(10), font=("System", 30))
+		scorebonus_label = Label(window, text="No Hit Bonus: " + str(nohit) + "\nDifficulty Modifier: " + str(self.damagemodifier) + "x\nCheat Modifier: " + str(cheatmodifier) + "x", font=("System", 15))
 		yourname_label = Label(window, text="Your Name: ", font=("System", 20))
 		self.name_entry = Entry(window, font=("System", 20))
 		nameadd_button = Button(window, text="Add", font=("System", 20), command= self.add)
@@ -1021,6 +1061,7 @@ class Game:
 		leaderboard_label = Label(window, text=leaderboard_text, font=("System", 18))
 
 		canvas.create_window(self.windowlength/2, 0+100, window=yourscore_label, tags=("fg"))
+		canvas.create_window((3*self.windowlength/4)+100, 0+100, window=scorebonus_label, tags=("fg"))
 		canvas.create_window((self.windowlength/2)-250, 0+175, window=yourname_label, tags=("fg"))
 		canvas.create_window(self.windowlength/2, 0+175, window=self.name_entry, tags=("fg"))
 		canvas.create_window((self.windowlength/2)+250, 0+175, window=nameadd_button, tags=("fg"))
@@ -1033,7 +1074,7 @@ class Game:
 		"""Adds the name given and score to the leaderboard file"""
 		name = self.name_entry.get()
 
-		leaderboardentry = {"name": name, "score": self.score}
+		leaderboardentry = {"name": name, "score": int(self.score)}
 
 		file = open("leaderboard.txt", "a")
 		file.write(json.dumps(leaderboardentry) + "\n")
@@ -1049,6 +1090,7 @@ class Game:
 
 		#A cleaner way of doing this may be to create a function which creates predetermined patterns.
 		if gametime == 1: #Single type 1 on left and right 
+
 			enemy_spawn(1, 450, -100, "stop", 225, 200, 0.5)
 			enemy_spawn(1, 450, -100, "stop", 675, 200, 0.5)
 
@@ -1082,9 +1124,9 @@ class Game:
 
 		elif (gametime >= 2100) and (gametime < 2700): #1 type 1 on either side moving across screen, 2 times
 
-			if not(gametime % 100):
-				enemy_spawn(1, -100, 300, "right")
-				enemy_spawn(1, 1000, 400, "left")
+			if not(gametime % 150):
+				enemy_spawn(1, -100, 300, "right", 0, 0, 0.8)
+				enemy_spawn(1, 1000, 400, "left", 0, 0, 0.8)
 
 		elif gametime == 2700: #Elite spawn
 
@@ -1128,7 +1170,7 @@ class Game:
 
 		elif (gametime >= 5500) and (gametime < 6100): #Multiple type 1 going right and left
 
-			if not(gametime % 200):
+			if not(gametime % 150):
 				enemy_spawn(1, -100, 100, "right")
 				enemy_spawn(1, 1000, 200, "left")
 
@@ -1158,10 +1200,10 @@ class Game:
 			enemy_spawn(1, 450, -100, "stop", 650, 150, 1.2)
 			enemy_spawn(1, 450, -100, "stop", 750, 200, 1.2)
 			enemy_spawn(1, 450, -100, "stop", 850, 250, 1.2)
-			enemy_spawn(4, 200, -100, "stop", 200, 200, 1.2)
-			enemy_spawn(4, 200, -100, "stop", 200, 350, 1.2)
-			enemy_spawn(4, 350, -100, "stop", 350, 200, 1.2)
-			enemy_spawn(4, 350, -100, "stop", 350, 350, 1.2)
+			enemy_spawn(4, 200, -100, "stop", 200, 200, 1.5)
+			enemy_spawn(4, 200, -100, "stop", 200, 350, 1.5)
+			enemy_spawn(4, 350, -100, "stop", 350, 200, 1.5)
+			enemy_spawn(4, 350, -100, "stop", 350, 350, 1.5)
 
 		elif gametime == 9000: #Diagonal pattern from center to left of type 1's, set of 4 type 4 on the right
 
@@ -1170,15 +1212,15 @@ class Game:
 			enemy_spawn(1, 450, -100, "stop", 250, 150, 1.2)
 			enemy_spawn(1, 450, -100, "stop", 150, 200, 1.2)
 			enemy_spawn(1, 450, -100, "stop", 50, 250, 1.2)
-			enemy_spawn(4, 650, -100, "stop", 650, 200, 1.2)
-			enemy_spawn(4, 650, -100, "stop", 650, 350, 1.2)
-			enemy_spawn(4, 500, -100, "stop", 500, 200, 1.2)
-			enemy_spawn(4, 500, -100, "stop", 500, 350, 1.2)
+			enemy_spawn(4, 650, -150, "stop", 650, 200, 1.5)
+			enemy_spawn(4, 650, -100, "stop", 650, 350, 1.5)
+			enemy_spawn(4, 500, -150, "stop", 500, 200, 1.5)
+			enemy_spawn(4, 500, -100, "stop", 500, 350, 1.5)
 
 		elif gametime == 10000: #2 type 3 in the center
 
-			enemy_spawn(3, 350, -100, "stop", 350, 300, 1.2)
-			enemy_spawn(3, 550, -100, "stop", 550, 300, 1.2)
+			enemy_spawn(3, 350, -100, "stop", 350, 300, 2)
+			enemy_spawn(3, 550, -100, "stop", 550, 300, 2)
 
 		elif gametime >= 10000 and gametime < 11500: #Type 4 going across the top from left to right, type 1 going down either side
 
@@ -1188,8 +1230,8 @@ class Game:
 
 			if not(gametime % 200):
 
-				enemy_spawn(1, 225, -100, "forward", 0, 0, 1.2)
-				enemy_spawn(1, 675, -100, "forward", 0, 0, 1.2)
+				enemy_spawn(1, 225, -100, "forward")
+				enemy_spawn(1, 675, -100, "forward")
 
 		elif gametime == 12000: #Elite 3, 2 type 5 on either side
 
@@ -1202,7 +1244,7 @@ class Game:
 
 			if not(gametime % 100):
 
-				enemy_spawn(4, -100, -150, "diagonalright", 0, 0, 2)
+				enemy_spawn(4, -100, -150, "diagonalright", 0, 0, 1.5)
 
 			if not(gametime % 250):
 
@@ -1220,8 +1262,8 @@ class Game:
 			enemy_spawn(1, 600, -150, "stop", 600, 100, 1.5)
 			enemy_spawn(1, 600, -100, "stop", 600, 150, 1.5)
 
-			enemy_spawn(4, 350, -100, "stop", 350, 150, 4)
-			enemy_spawn(4, 550, -100, "stop", 550, 150, 4)
+			enemy_spawn(4, 350, -100, "stop", 350, 200, 4)
+			enemy_spawn(4, 550, -100, "stop", 550, 200, 4)
 
 		elif gametime >= 16000 and gametime < 17000: #Periodic type 3 moving down the middle
 
@@ -1229,11 +1271,11 @@ class Game:
 
 				enemy_spawn(3, 450, -100, "forward", 0, 0, 2)
 
-		elif gametime == 17000 and gametime < 18000: #Same as 13500
+		elif gametime >= 17000 and gametime < 18000: #Same as 13500
 
 			if not(gametime % 100):
 
-				enemy_spawn(4, 1000, -150, "diagonalleft", 0, 0, 2)
+				enemy_spawn(4, 1000, -150, "diagonalleft", 0, 0, 1.5)
 
 			if not(gametime % 250):
 
@@ -1242,43 +1284,54 @@ class Game:
 
 		elif gametime == 18500: #Elite 4, 2 type 5 on either side
 
-			enemy_spawn(5, 225, -100, "stop", 225, 250, 1.5)
-			enemy_spawn(5, 625, -100, "stop", 625, 250, 1.5)
+			enemy_spawn(5, 225, -100, "stop", 225, 250, 4)
+			enemy_spawn(5, 625, -100, "stop", 625, 250, 4)
 
-#-----------------------------------------------------------------------------------
+			enemy_spawn(4, 350, -100, "stop", 350, 150, 2)
+			enemy_spawn(4, 550, -100, "stop", 550, 150, 2)
 
-		elif gametime >= 18500 and gametime < 21000: #Periodic type 4 in the center
+		elif gametime >= 18500 and gametime < 22000: #Periodic type 4 in the center
 
 			if not(gametime % 500):
 
-				enemy_spawn(4, 350, -100, "stop", 350, 150, 4)
-				enemy_spawn(4, 550, -100, "stop", 550, 150, 4)
+				enemy_spawn(4, 350, -100, "stop", 350, 150, 2)
+				enemy_spawn(4, 550, -100, "stop", 550, 150, 2)
 
-		elif gametime == 22000: #2 type 1 on either side, 2 type 1 in middle, 2 type 2 entering from either side
+#-----------------------------------------------------------------------------------
 
-			enemy_spawn(1, 450, -100, "stop", 225, 200, 1.5)
-			enemy_spawn(1, 450, -100, "stop", 675, 200, 1.5)
-			enemy_spawn(1, 450, -100, "stop", 225, 400, 1.5)
-			enemy_spawn(1, 450, -100, "stop", 675, 400, 1.5)
-
-			enemy_spawn(1, 450, -100, "stop", 350, 300)
-			enemy_spawn(1, 450, -100, "stop", 550, 300)
-			enemy_spawn(2, -100, 100, "right")
-			enemy_spawn(2, 1000, 150, "left")
-
-		elif gametime >= 22000 and gametime < 23500:
+		elif gametime >= 22500 and gametime < 24000: #2 type 1 on either side, 2 type 1 in middle, 2 type 2 entering from either side, periodic type 4 from the right
 
 			if not(gametime % 300):
 
-				enemy_spawn(4, -100, 350, "right", 0, 0, 2)
+				enemy_spawn(1, 450, -100, "stop", 225, 200)
+				enemy_spawn(1, 450, -100, "stop", 675, 200)
+				enemy_spawn(1, 450, -100, "stop", 225, 400)
+				enemy_spawn(1, 450, -100, "stop", 675, 400)
 
-		elif gametime == 24000:
+				enemy_spawn(1, 450, -100, "stop", 350, 300)
+				enemy_spawn(1, 450, -100, "stop", 550, 300)
+				enemy_spawn(2, -100, 100, "right")
+				enemy_spawn(2, 1000, 150, "left")
 
-			enemy_spawn(4, 450 -100, "stop", 450, 250, 5)
+			if not(gametime % 150):
 
-		elif gametime >=26000 and self.enemylist == None:
+				enemy_spawn(4, -100, 350, "right", 0, 0, 1.5)
 
-			enemy_spawn("boss", 450 -100, "stop", 450, 100)
+		elif gametime == 24500:
+
+			enemy_spawn(5, 450, -100, "stop", 450, 150, 4)
+
+			enemy_spawn(1, 1000, 200, "left")
+
+		elif gametime >= 24500 and gametime < 26500:
+
+			if not(gametime % 200):
+				enemy_spawn(1, 1000, 400, "left")
+
+
+		elif gametime >=26500 and self.enemylist == None:
+
+			enemy_spawn("boss", 450, -100, "stop", 450, 100)
 
 		self.game_loop()
 
