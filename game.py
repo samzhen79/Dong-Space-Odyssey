@@ -28,13 +28,13 @@ class Menu:
 		"""Creates a menu, takes arguments so that different menus can be chosen"""
 		canvas.delete("fg")  # Removes all foreground canvas items
 
-		back_button = Button(window, text="Back", font=("Impact", 50), command=self.createmenu)
+		back_button = Button(window, text="Back", font=("System", 50), command=self.createmenu)
 
 		if menutype == "play":
 
-			newgame_button = Button(window, text="New Game", font=("Impact", 50),
+			newgame_button = Button(window, text="New Game", font=("System", 50),
 									command=lambda menutype="chooseship": self.createmenu(menutype))
-			loadgame_button = Button(window, text="Load Game", font=("Impact", 50),
+			loadgame_button = Button(window, text="Load Game", font=("System", 50),
 									 command=lambda windowlength=self.windowlength, windowheight=self.windowheight,
 													difficulty=None, ship=None: Game(windowlength, windowheight,
 																					 difficulty, ship).loadgame())
@@ -48,7 +48,7 @@ class Menu:
 
 			ship = canvas.create_image(self.windowlength / 2, 440, image=shipA[1], tags="fg")
 
-			choose_button = Button(window, text="Choose", font=("Impact", 50),
+			choose_button = Button(window, text="Choose", font=("System", 50),
 								   command=lambda menutype="difficulty": self.createmenu(menutype))
 			canvas.create_window(self.windowlength / 2, 700, anchor=CENTER, window=choose_button, tags="fg")
 
@@ -57,15 +57,15 @@ class Menu:
 
 		elif menutype == "difficulty":
 
-			easy_button = Button(window, text="Easy", font=("Impact", 50),
+			easy_button = Button(window, text="Easy", font=("System", 50),
 								 command=lambda windowlength=self.windowlength, windowheight=self.windowheight,
 												difficulty="easy", ship="ship": Game(windowlength, windowheight,
 																					 difficulty, ship).newgame())
-			normal_button = Button(window, text="Normal", font=("Impact", 50),
+			normal_button = Button(window, text="Normal", font=("System", 50),
 								   command=lambda windowlength=self.windowlength, windowheight=self.windowheight,
 												  difficulty="normal", ship="ship": Game(windowlength, windowheight,
 																						 difficulty, ship).newgame())
-			hard_button = Button(window, text="Hard", font=("Impact", 50),
+			hard_button = Button(window, text="Hard", font=("System", 50),
 								 command=lambda windowlength=self.windowlength, windowheight=self.windowheight,
 												difficulty="hard", ship="ship": Game(windowlength, windowheight,
 																					 difficulty, ship).newgame())
@@ -79,29 +79,26 @@ class Menu:
 
 		elif menutype == "settings":
 
-			settingsTitle_image = PhotoImage(file="Assets/Settings.png")
-			controlsTitle_image = PhotoImage(file="Assets/controls.png")
-
 			changeshoot_button = Button(window, text="Shoot key is: \n' " + self.settings["CONTROLS"][
-				"Shoot"] + " '\nPress to change key.", font=("Impact", 18),
+				"Shoot"] + " '\nPress to change.", font=("System", 18),
 										command=lambda control="Shoot", button=0: self.changekey(control, button))
 			changeforward_button = Button(window, text="Forward key is: \n' " + self.settings["CONTROLS"][
-				"Forward"] + " '\nPress to change key.", font=("Impact", 18),
+				"Forward"] + " '\nPress to change.", font=("System", 18),
 										  command=lambda control="Forward", button=1: self.changekey(control, button))
 			changebackward_button = Button(window, text="Backward key is: \n' " + self.settings["CONTROLS"][
-				"Backward"] + " '\nPress to change key.", font=("Impact", 18),
+				"Backward"] + " '\nPress to change.", font=("System", 18),
 										   command=lambda control="Backward", button=2: self.changekey(control, button))
 			changeleft_button = Button(window, text="Left key is: \n' " + self.settings["CONTROLS"][
-				"Left"] + " '\nPress to change key.", font=("Impact", 18),
+				"Left"] + " '\nPress to change.", font=("System", 18),
 									   command=lambda control="Left", button=3: self.changekey(control, button))
 			changeright_button = Button(window, text="Right key is: \n' " + self.settings["CONTROLS"][
-				"Right"] + " '\nPress to change key.", font=("Impact", 18),
+				"Right"] + " '\nPress to change.", font=("System", 18),
 										command=lambda control="Right", button=4: self.changekey(control, button))
 			changepause_button = Button(window, text="Pause key is: \n' " + self.settings["CONTROLS"][
-				"Pause"] + " '\nPress to change key.", font=("Impact", 18),
+				"Pause"] + " '\nPress to change.", font=("System", 18),
 										command=lambda control="Pause", button=5: self.changekey(control, button))
 			changebosskey_button = Button(window, text="Bosskey key is: \n' " + self.settings["CONTROLS"][
-				"Bosskey"] + " '\nPress to change key.", font=("Impact", 18),
+				"Bosskey"] + " '\nPress to change.", font=("System", 18),
 										  command=lambda control="Bosskey", button=6: self.changekey(control, button))
 
 			self.controls = [changeshoot_button, changeforward_button, changebackward_button, changeleft_button,
@@ -116,17 +113,14 @@ class Menu:
 
 			canvas.create_window(self.windowlength / 2, 450, anchor=CENTER, window=changeforward_button, tags="fg")
 			canvas.create_window(self.windowlength / 2, 575, anchor=CENTER, window=changebackward_button, tags="fg")
-			canvas.create_window(225, 500, anchor=CENTER, window=changeleft_button, tags="fg")
-			canvas.create_window(675, 500, anchor=CENTER, window=changeright_button, tags="fg")
+			canvas.create_window(200, 500, anchor=CENTER, window=changeleft_button, tags="fg")
+			canvas.create_window(700, 500, anchor=CENTER, window=changeright_button, tags="fg")
 			canvas.create_window(self.windowlength / 2, 725, anchor=CENTER, window=changepause_button, tags="fg")
 			canvas.create_window(self.windowlength / 2, 850, anchor=CENTER, window=changebosskey_button, tags="fg")
 
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
 		elif menutype == "howtoplay":
-
-			howtoplayTitle_image = PhotoImage(file="Assets/howtoplaytitle.png")
-			howtoplay_image = PhotoImage(file="Assets/howtoplaytext.png")
 
 			canvas.create_image(self.windowlength / 2, 100, anchor=CENTER, image=howtoplayTitle_image,
 													  tags="fg")
@@ -136,9 +130,7 @@ class Menu:
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
 		elif menutype == "about":
-			
-			aboutTitle_image = PhotoImage(file="Assets/About.png")
-			about_image = PhotoImage(file="Assets/abouttext.png")
+		
 
 			canvas.create_image(self.windowlength / 2, 100, anchor=CENTER, image=aboutTitle_image,
 													  tags="fg")
@@ -148,8 +140,6 @@ class Menu:
 			canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
 		elif menutype == "leaderboard":
-
-			leaderboardTitle_image = PhotoImage(file="Assets/leaderboard.png")
 
 			file = open("leaderboard.txt", "r")
 			leaderboard_read = file.read().split("\n")
@@ -165,7 +155,7 @@ class Menu:
 
 			leaderboard_list.sort(reverse=True, key=getscore)
 
-			leaderboard_list = leaderboard_list[:25] #Only get the top 25 items
+			leaderboard_list = leaderboard_list[:20] #Only get the top 25 items
 
 			leaderboard_text = ""
 			i = 0
@@ -173,7 +163,7 @@ class Menu:
 				i += 1
 				leaderboard_text += (str(i) + ". " + item["name"] + ": " + str(item["score"]) + "\n")
 
-			leaderboard_label = Label(window, text=leaderboard_text, font=("Impact", 18))
+			leaderboard_label = Label(window, text=leaderboard_text, font=("System", 18))
 
 			canvas.create_image(self.windowlength/2, 0+100, image=leaderboardTitle_image, tags=("fg"))
 			canvas.create_window(self.windowlength/2, 0+150, anchor=N, window=leaderboard_label, tags=("fg"))
@@ -183,18 +173,17 @@ class Menu:
 
 		else:  # This is the default menutype i.e. the main menu
 
-
-			play_button = Button(window, text="Play", font=("Impact", 50), width=8, height=1,
+			play_button = Button(window, text="Play", font=("System", 50), width=8, height=1,
 								 command=lambda menutype="play": self.createmenu(menutype))
-			settings_button = Button(window, text="Settings", font=("Impact", 30), width=10, height=1,
+			settings_button = Button(window, text="Settings", font=("System", 30), width=10, height=1,
 									 command=lambda menutype="settings": self.createmenu(menutype))
-			about_button = Button(window, text="About", font=("Impact", 30), width=10, height=1,
+			about_button = Button(window, text="About", font=("System", 30), width=10, height=1,
 								  command=lambda menutype="about": self.createmenu(menutype))
-			leaderboard_button = Button(window, text="Leaderboard", font=("Impact", 30), width=10, height=1,
+			leaderboard_button = Button(window, text="Leaderboard", font=("System", 30), width=10, height=1,
 								  command=lambda menutype="leaderboard": self.createmenu(menutype))
-			howtoplay_button = Button(window, text="How to Play", font=("Impact", 30), width=10, height=1,
+			howtoplay_button = Button(window, text="How to Play", font=("System", 30), width=10, height=1,
 								  command=lambda menutype="howtoplay": self.createmenu(menutype))
-			exit_button = Button(window, text="Exit", font=("Impact", 30), command=lambda: window.destroy())
+			exit_button = Button(window, text="Exit", font=("System", 30), command=lambda: window.destroy())
 
 			canvas.create_image(self.windowlength / 2, 150, anchor=CENTER, image=title_image, tags="fg")
 			canvas.create_window(self.windowlength / 2, 350, anchor=CENTER, window=play_button, tags="fg")
@@ -223,7 +212,7 @@ class Menu:
 
 			window.unbind("<Key>")
 
-		keyprompt_label = Label(window, text="Press a key...", font=("Impact", 30), width=500, height=600)
+		keyprompt_label = Label(window, text="Press a key...", font=("System", 30), width=500, height=600)
 		keyprompt_canvaswindow = canvas.create_window(self.windowlength / 2, 540, anchor=CENTER, window=keyprompt_label,
 													  tags="fg")
 
@@ -299,7 +288,7 @@ class Game:
 			window.update()
 
 		# UI Elements
-		self.score_label = Label(window, text="Score: " + str(self.score).zfill(10), font=("Impact", 18))
+		self.score_label = Label(window, text="Score: " + str(self.score).zfill(10), font=("System", 18))
 
 		canvas.create_window(windowlength, 0, anchor=NE, window=self.score_label, tags=("fg", "game"))
 		healthbarbg = canvas.create_line(0, self.windowheight - 10, self.windowlength, self.windowheight - 10,
@@ -385,7 +374,7 @@ class Game:
 			file.close()
 
 			# UI Elements
-			self.score_label = Label(window, text="Score: " + str(self.score).zfill(10), font=("Impact", 18))
+			self.score_label = Label(window, text="Score: " + str(self.score).zfill(10), font=("System", 18))
 
 			canvas.create_window(windowlength, 0, anchor=NE, window=self.score_label, tags=("fg", "game"))
 			healthbarbg = canvas.create_line(0, self.windowheight - 10, self.windowlength, self.windowheight - 10,
@@ -617,11 +606,11 @@ class Game:
 		self.move("bg3", 0, 6)
 
 		if canvas.coords("bg0")[1] >= 3000:
-			canvas.move("bg0", 0, -2000)
+			self.move("bg0", 0, -2000)
 		if canvas.coords("bg2")[1] >= 3000:
-			canvas.move("bg2", 0, -2000)
+			self.move("bg2", 0, -2000)
 		if canvas.coords("bg3")[1] >= 3000:
-			canvas.move("bg3", 0, -2000)
+			self.move("bg3", 0, -2000)
 
 		# Player Movement
 		x, y = 0, 0
@@ -961,8 +950,8 @@ class Game:
 
 			if self.pausestate:
 
-				resume_button = Button(window, text="Resume", font=("Impact", 50), command=self.game_loop)
-				mainmenu_button = Button(window, text="Main Menu", font=("Impact", 50), command=self.saveonreturn)
+				resume_button = Button(window, text="Resume", font=("System", 50), command=self.game_loop)
+				mainmenu_button = Button(window, text="Main Menu", font=("System", 50), command=self.saveonreturn)
 
 				canvas.create_window(self.windowlength / 2, 300, anchor=CENTER, window=resume_button,
 									 tags=("fg", "pausebutton"))
@@ -971,16 +960,16 @@ class Game:
 
 			elif self.bossstate:
 
-				resume_button = Button(window, text="Resume", font=("Impact", 15), command=self.game_loop)
+				resume_button = Button(window, text="Resume", font=("System", 15), command=self.game_loop)
 
 				self.createimage(0, 0, anchor=NW, image=bosskey_image, tags=("fg", "pausebutton"))
 				canvas.create_window(0, 1017, anchor=SW, window=resume_button, tags=("fg", "pausebutton"))
 
 			elif self.cheatstate:
 
-				resume_button = Button(window, text="Resume", font=("Impact", 30), command=self.game_loop)
-				heal_button = Button(window, text="Heal to full health", font=("Impact", 30), command=self.heal_cheat)
-				quicklevel_button = Button(window, text="Jump to level 5 ship", font=("Impact", 30), command=self.level_cheat)
+				resume_button = Button(window, text="Resume", font=("System", 30), command=self.game_loop)
+				heal_button = Button(window, text="Heal to full health", font=("System", 30), command=self.heal_cheat)
+				quicklevel_button = Button(window, text="Jump to level 5 ship", font=("System", 30), command=self.level_cheat)
 
 				canvas.create_window(450, 200, window=heal_button, tags=("fg", "pausebutton"))
 				canvas.create_window(450, 400, window=quicklevel_button, tags=("fg", "pausebutton"))
@@ -1003,11 +992,11 @@ class Game:
 
 		self.score = self.score*self.damagemodifier #Higher difficulty gives more points
 
-		yourscore_label = Label(window, text="Your Score: " + str(self.score).zfill(10), font=("Impact", 30))
-		yourname_label = Label(window, text="Your Name: ", font=("Impact", 20))
-		self.name_entry = Entry(window, font=("Impact", 20))
-		nameadd_button = Button(window, text="Add", font=("Impact", 20), command= self.add)
-		back_button = Button(window, text="Back", font=("Impact", 50), command=Menu(self.windowlength, self.windowheight).createmenu)
+		yourscore_label = Label(window, text="Your Score: " + str(self.score).zfill(10), font=("System", 30))
+		yourname_label = Label(window, text="Your Name: ", font=("System", 20))
+		self.name_entry = Entry(window, font=("System", 20))
+		nameadd_button = Button(window, text="Add", font=("System", 20), command= self.add)
+		back_button = Button(window, text="Back", font=("System", 50), command=Menu(self.windowlength, self.windowheight).createmenu)
 
 		file = open("leaderboard.txt", "r")
 		leaderboard_read = file.read().split("\n")
@@ -1025,16 +1014,16 @@ class Game:
 
 		leaderboard_text = ""
 		i = 0
-		for item in leaderboard_list[:25]:
+		for item in leaderboard_list[:20]:
 			i += 1
 			leaderboard_text += (str(i) + ". " + item["name"] + ": " + str(item["score"]) + "\n")
 
-		leaderboard_label = Label(window, text=leaderboard_text, font=("Impact", 15))
+		leaderboard_label = Label(window, text=leaderboard_text, font=("System", 18))
 
 		canvas.create_window(self.windowlength/2, 0+100, window=yourscore_label, tags=("fg"))
-		canvas.create_window((self.windowlength/2)-210, 0+175, window=yourname_label, tags=("fg"))
+		canvas.create_window((self.windowlength/2)-250, 0+175, window=yourname_label, tags=("fg"))
 		canvas.create_window(self.windowlength/2, 0+175, window=self.name_entry, tags=("fg"))
-		canvas.create_window((self.windowlength/2)+180, 0+175, window=nameadd_button, tags=("fg"))
+		canvas.create_window((self.windowlength/2)+250, 0+175, window=nameadd_button, tags=("fg"))
 		canvas.create_image(self.windowlength/2, 0+250, image=leaderboardTitle_image, tags=("fg"))
 		canvas.create_window(self.windowlength/2, 0+300, anchor=N, window=leaderboard_label, tags=("fg"))
 
@@ -1169,12 +1158,12 @@ class Game:
 			enemy_spawn(1, 450, -100, "stop", 650, 150, 1.2)
 			enemy_spawn(1, 450, -100, "stop", 750, 200, 1.2)
 			enemy_spawn(1, 450, -100, "stop", 850, 250, 1.2)
-			enemy_spawn(4, 225, -100, "stop", 225, 200, 1.2)
-			enemy_spawn(4, 225, -100, "stop", 225, 350, 1.2)
-			enemy_spawn(4, 300, -100, "stop", 300, 200, 1.2)
-			enemy_spawn(4, 300, -100, "stop", 300, 350, 1.2)
+			enemy_spawn(4, 200, -100, "stop", 200, 200, 1.2)
+			enemy_spawn(4, 200, -100, "stop", 200, 350, 1.2)
+			enemy_spawn(4, 350, -100, "stop", 350, 200, 1.2)
+			enemy_spawn(4, 350, -100, "stop", 350, 350, 1.2)
 
-		elif gametime == 9000: #Diagonal pattern from center to right of type 1's, set of 4 type 4 on the left
+		elif gametime == 9000: #Diagonal pattern from center to left of type 1's, set of 4 type 4 on the right
 
 			enemy_spawn(1, 450, -100, "stop", 450, 50, 1.2)
 			enemy_spawn(1, 450, -100, "stop", 350, 100, 1.2)
@@ -1256,6 +1245,8 @@ class Game:
 			enemy_spawn(5, 225, -100, "stop", 225, 250, 1.5)
 			enemy_spawn(5, 625, -100, "stop", 625, 250, 1.5)
 
+#-----------------------------------------------------------------------------------
+
 		elif gametime >= 18500 and gametime < 21000: #Periodic type 4 in the center
 
 			if not(gametime % 500):
@@ -1263,7 +1254,7 @@ class Game:
 				enemy_spawn(4, 350, -100, "stop", 350, 150, 4)
 				enemy_spawn(4, 550, -100, "stop", 550, 150, 4)
 
-		elif gametime == 22000:
+		elif gametime == 22000: #2 type 1 on either side, 2 type 1 in middle, 2 type 2 entering from either side
 
 			enemy_spawn(1, 450, -100, "stop", 225, 200, 1.5)
 			enemy_spawn(1, 450, -100, "stop", 675, 200, 1.5)
@@ -1272,8 +1263,22 @@ class Game:
 
 			enemy_spawn(1, 450, -100, "stop", 350, 300)
 			enemy_spawn(1, 450, -100, "stop", 550, 300)
-			enemy_spawn(1, -100, 100, "right")
-			enemy_spawn(1, 1000, 150, "left")
+			enemy_spawn(2, -100, 100, "right")
+			enemy_spawn(2, 1000, 150, "left")
+
+		elif gametime >= 22000 and gametime < 23500:
+
+			if not(gametime % 300):
+
+				enemy_spawn(4, -100, 350, "right", 0, 0, 2)
+
+		elif gametime == 24000:
+
+			enemy_spawn(4, 450 -100, "stop", 450, 250, 5)
+
+		elif gametime >=26000 and self.enemylist == None:
+
+			enemy_spawn("boss", 450 -100, "stop", 450, 100)
 
 		self.game_loop()
 
@@ -1296,7 +1301,13 @@ canvas.create_image(0, windowheight, anchor=SW, image=background3_image, tag=("b
 canvas.pack()
 
 title_image = PhotoImage(file="Assets/Title.png")
-
+settingsTitle_image = PhotoImage(file="Assets/Settings.png")
+controlsTitle_image = PhotoImage(file="Assets/controls.png")
+howtoplayTitle_image = PhotoImage(file="Assets/howtoplaytitle.png")
+howtoplay_image = PhotoImage(file="Assets/howtoplaytext.png")
+aboutTitle_image = PhotoImage(file="Assets/About.png")
+about_image = PhotoImage(file="Assets/abouttext.png")
+leaderboardTitle_image = PhotoImage(file="Assets/Leaderboard.png")
 bosskey_image = PhotoImage(file="Assets/excel-data-1.png")
 
 # Player Ship
