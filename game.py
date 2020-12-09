@@ -238,7 +238,8 @@ class Game:
 
 		self.ship = ship
 		self.maxvelocity = 8
-		self.velx, self.vely, self.gametime, self.attackinterval, self.expcounter, self.score = 0, 0, 0, 0, 0, 0
+		self.velx, self.vely, self.attackinterval, self.expcounter, self.score = 0, 0, 0, 0, 0
+		self.gametime = 26000
 		self.shoot, self.pausestate, self.bossstate, self.cheatstate, self.cheataccess = False, False, False, False, False
 		self.shipstats = {
 			"type": 1,
@@ -843,6 +844,7 @@ class Game:
 
 						enemystats["health"] -= 8 * self.shipstats["damagemultiplier"]
 
+
 					if enemystats["health"] <= 0:
 
 						try:
@@ -861,6 +863,10 @@ class Game:
 
 									canvas.itemconfig("shipbody", image=shipA[self.shipstats["level"]])
 
+							if enemytype == "boss":
+
+								self.addtoleaderboard()
+								return
 
 						except ValueError:  # Catches the exception when two bullets both collide with an enemy and program tries to remove the enemy twice
 
@@ -1031,7 +1037,7 @@ class Game:
 			cheatmodifier = 0.5
 			self.score = self.score * 0.5
 
-		yourscore_label = Label(window, text="Your Score: " + str(self.score).zfill(10), font=("System", 30))
+		yourscore_label = Label(window, text="Your Score: " + str(int(self.score)).zfill(10), font=("System", 30))
 		scorebonus_label = Label(window, text="No Hit Bonus: " + str(nohit) + "\nDifficulty Modifier: " + str(self.damagemodifier) + "x\nCheat Modifier: " + str(cheatmodifier) + "x", font=("System", 15))
 		yourname_label = Label(window, text="Your Name: ", font=("System", 20))
 		self.name_entry = Entry(window, font=("System", 20))
@@ -1329,7 +1335,7 @@ class Game:
 				enemy_spawn(1, 1000, 400, "left")
 
 
-		elif gametime >=26500 and self.enemylist == None:
+		elif gametime ==26500:
 
 			enemy_spawn("boss", 450, -100, "stop", 450, 100)
 
