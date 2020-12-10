@@ -2,6 +2,7 @@
 # May take a few seconds to load
 # Type "cheat" while in game to access the cheats menu
 # Built in Windows OS, should work on linux
+# Game will auto save upon pause or window being closed
 
 # Credits:
 # Background - Parallax Space Scene by LuminousDragonGames (https://opengameart.org/content/parallax-space-scene-seamlessly-scrolls-too)
@@ -171,7 +172,6 @@ class Menu:
 
             canvas.create_window(0, self.windowheight, anchor=SW, window=back_button, tags="fg")
 
-
         else:  # This is the default menutype i.e. the main menu
 
             play_button = Button(window, text="Play", font=("System", 50), width=8, height=1,
@@ -184,7 +184,7 @@ class Menu:
                                         command=lambda menutype="leaderboard": self.createmenu(menutype))
             howtoplay_button = Button(window, text="How to Play", font=("System", 30), width=10, height=1,
                                       command=lambda menutype="howtoplay": self.createmenu(menutype))
-            exit_button = Button(window, text="Exit", font=("System", 30), command=lambda: window.destroy())
+            exit_button = Button(window, text="Exit", font=("System", 30), command=exit)
 
             canvas.create_image(self.windowlength / 2, 150, anchor=CENTER, image=title_image, tags="fg")
             canvas.create_window(self.windowlength / 2, 350, anchor=CENTER, window=play_button, tags="fg")
@@ -295,16 +295,19 @@ class Game:
         # UI Elements
         self.score_label = Label(window, text="Score: " + str(self.score).zfill(10), font=("System", 18))
 
-        canvas.create_window(windowlength, 0, anchor=NE, window=self.score_label, tags=("fg", "game"))
+        canvas.create_window(windowlength, 0 + 20, anchor=NE, window=self.score_label, tags=("fg", "game"))
+
         healthbarbg = canvas.create_line(0, self.windowheight - 10, self.windowlength, self.windowheight - 10,
                                          fill="red", width=10, tags=("fg", "game"))
         self.healthbarfg = canvas.create_line(0, self.windowheight - 10, self.windowlength, self.windowheight - 10,
                                               fill="green", width=10, tags=("fg", "game"))
 
-        # Start game loop
+        # Controls
         canvas.bind_all("<KeyPress>", self.key_press)
         canvas.bind_all("<KeyRelease>", self.key_release)
         canvas.bind_all("cheat", self.cheatmenu)
+
+        # Start game loop
         self.game_loop()
 
     def loadgame(self):  # Load saved game, if no saved game available then starts a new game
@@ -392,16 +395,25 @@ class Game:
             # UI Elements
             self.score_label = Label(window, text="Score: " + str(self.score).zfill(10), font=("System", 18))
 
-            canvas.create_window(windowlength, 0, anchor=NE, window=self.score_label, tags=("fg", "game"))
+            canvas.create_window(windowlength, 0 + 20, anchor=NE, window=self.score_label, tags=("fg", "game"))
             healthbarbg = canvas.create_line(0, self.windowheight - 10, self.windowlength, self.windowheight - 10,
                                              fill="red", width=10, tags=("fg", "game"))
             self.healthbarfg = canvas.create_line(0, self.windowheight - 10, self.windowlength, self.windowheight - 10,
                                                   fill="green", width=10, tags=("fg", "game"))
 
+            for enemy in self.enemylist:
+
+                if enemy["stats"]["type"] == "boss":
+                    bosshealthbarbg = canvas.create_line(0, 0 + 10, self.windowlength, 0 + 10,
+                                                         fill="red", width=10, tags=("fg", "game"))
+
+                    self.bosshealthbarfg = canvas.create_line(0, 0 + 10, self.windowlength, 0 + 10,
+                                                              fill="yellow", width=10, tags=("fg", "game"))
+
             # Player Movement and shooting
             canvas.bind_all("<KeyPress>", self.key_press)
             canvas.bind_all("<KeyRelease>", self.key_release)
-            canvas.bind_all("cheats", self.cheatmenu)
+            canvas.bind_all("cheat", self.cheatmenu)
 
             # Start game loop
             self.game_loop()
@@ -539,7 +551,7 @@ class Game:
             enemy = self.createimage(spawnx, spawny, image=boss1_image, tag=("fg", "enemy", "game", "gameimage"))
             enemystats = {
                 "type": "boss",
-                "health": 10000,
+                "health": 15000,
                 "movement": movement,
                 "stopx": stopx,
                 "stopy": stopy,
@@ -547,6 +559,12 @@ class Game:
                 "damage": 10,
                 "points": 100000
             }
+
+            bosshealthbarbg = canvas.create_line(0, 0 + 10, self.windowlength, 0 + 10,
+                                                 fill="red", width=10, tags=("fg", "game"))
+
+            self.bosshealthbarfg = canvas.create_line(0, 0 + 10, self.windowlength, 0 + 10,
+                                                      fill="yellow", width=10, tags=("fg", "game"))
 
         self.enemylist.append({"id": enemy, "stats": enemystats, "attackcounter": 0})
 
@@ -598,10 +616,11 @@ class Game:
 
         self.savestate.close()
         window.destroy()
+        window.quit()
 
     def saveonreturn(self):
         """Saves the game state when returning to main menu. Just closes the savestate.txt file, actually saving happens on pause"""
-        window.protocol("WM_DELETE_WINDOW", window.destroy)
+        window.protocol("WM_DELETE_WINDOW", exit)
         Menu(self.windowlength, self.windowheight).createmenu()
 
     # The Actual Game
@@ -614,6 +633,7 @@ class Game:
         window.protocol("WM_DELETE_WINDOW", self.saveonclose)
 
         self.score_label.config(text="Score: " + str(self.score).zfill(10))
+        # Player health update
         canvas.coords(self.healthbarfg, 0, self.windowheight - 10, self.windowlength * (self.shipstats["health"] / 100),
                       self.windowheight - 10)  # Assuming max health is 100
 
@@ -675,7 +695,6 @@ class Game:
                                          tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
                         self.createimage(x1 - 90, y0 + 100, image=playerlaserstraight_image,
                                          tag=("fg", "playerbulletstraight", "playerbullet", "game", "gameimage"))
-
 
             elif shiplevel <= 5:  # Levels 3-5
 
@@ -838,6 +857,12 @@ class Game:
                     else:
 
                         enemystats["health"] -= 8 * self.shipstats["damagemultiplier"]
+
+                    # Boss healthbar update
+                    if enemytype == "boss":
+                        canvas.coords(self.bosshealthbarfg, 0, 0 + 10,
+                                      self.windowlength * (enemystats["health"] / 15000),
+                                      0 + 10)  # Assume max health is 15,000
 
                     if enemystats["health"] <= 0:
 
@@ -1016,7 +1041,7 @@ class Game:
         """Shows current leaderboard and gives the player the option to add their score to the leaderboard"""
         canvas.delete("fg")
 
-        window.protocol("WM_DELETE_WINDOW", window.destroy)
+        window.protocol("WM_DELETE_WINDOW", exit)
 
         nohit = 0
         if self.shipstats["health"] == 100:  # Bonus 50,000 points for not getting hit
@@ -1231,8 +1256,8 @@ class Game:
                 enemy_spawn(4, -100, 100, "right", 0, 0, 1.2)
 
             if not (gametime % 200):
-                enemy_spawn(1, 225, -100, "forward")
-                enemy_spawn(1, 675, -100, "forward")
+                enemy_spawn(1, 225, -100, "forward", 0, 0, 0.8)
+                enemy_spawn(1, 675, -100, "forward", 0, 0, 0.8)
 
         elif gametime == 12000:  # Elite 3, 2 type 5 on either side
 
@@ -1244,7 +1269,7 @@ class Game:
         elif 13500 <= gametime < 15500:  # Series of type 4 going from top right to bottom left, periodic type 2 entering from left
 
             if not (gametime % 100):
-                enemy_spawn(4, -100, -150, "diagonalright", 0, 0, 1.5)
+                enemy_spawn(4, -100, -150, "diagonalright", 0, 0, 1.3)
 
             if not (gametime % 250):
                 enemy_spawn(1, 450, -100, "stop", 450, 150, 1.5)
@@ -1272,7 +1297,7 @@ class Game:
         elif 17000 <= gametime < 18000:  # Same as 13500
 
             if not (gametime % 100):
-                enemy_spawn(4, 1000, -150, "diagonalleft", 0, 0, 1.5)
+                enemy_spawn(4, 1000, -150, "diagonalleft", 0, 0, 1.3)
 
             if not (gametime % 250):
                 enemy_spawn(1, 450, -100, "stop", 450, 150, 1.5)
@@ -1283,8 +1308,8 @@ class Game:
             enemy_spawn(5, 225, -100, "stop", 225, 250, 4)
             enemy_spawn(5, 625, -100, "stop", 625, 250, 4)
 
-            enemy_spawn(4, 350, -100, "stop", 350, 150, 2)
-            enemy_spawn(4, 550, -100, "stop", 550, 150, 2)
+            enemy_spawn(4, 350, -100, "stop", 350, 150, 1.5)
+            enemy_spawn(4, 550, -100, "stop", 550, 150, 1.5)
 
         elif 18500 <= gametime < 22000:  # Periodic type 4 in the center
 
@@ -1307,26 +1332,30 @@ class Game:
                 enemy_spawn(2, -100, 100, "right")
                 enemy_spawn(2, 1000, 150, "left")
 
-            if not (gametime % 150):
+            if not (gametime % 150):  # Periodic type 4 moving to right
                 enemy_spawn(4, -100, 350, "right", 0, 0, 1.5)
 
-        elif gametime == 24500:
+        elif gametime == 24500:  # Elite pre run for boss
 
-            enemy_spawn(5, 450, -100, "stop", 450, 150, 4)
+            enemy_spawn(5, 450, -100, "stop", 450, 150, 5)
 
             enemy_spawn(1, 1000, 200, "left")
 
-        elif 24500 <= gametime < 26500:
+        elif 24500 <= gametime < 26500:  # Period type 1 moving to left
 
             if not (gametime % 200):
                 enemy_spawn(1, 1000, 400, "left")
 
-
-        elif gametime == 26500:
-
+        elif gametime == 26500:  # Boss encounter
             enemy_spawn("boss", 450, -100, "stop", 450, 100)
 
         self.game_loop()
+
+
+def exit():
+    """Completely exits the program"""
+    window.destroy()
+    window.quit()
 
 
 window = Tk()
