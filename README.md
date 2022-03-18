@@ -32,7 +32,7 @@ Unfortunately there are a few fundamental problems with the game
 
 <img src="https://user-images.githubusercontent.com/75619220/158953749-6a8914cd-66e7-40f0-906a-858cf016c548.png" width="500">
 
-<img src="https://user-images.githubusercontent.com/75619220/158954076-c2189160-7c4f-4b2b-ba80-906bc134d7b5.png" width="500">
+<img src="https://user-images.githubusercontent.com/75619220/158956295-f3919e37-2f3a-4df5-af95-8d933b7fd26e.png" width="500">
 
 ## Usage
 You can start the program by running:
